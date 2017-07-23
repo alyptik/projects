@@ -1,0 +1,1 @@
+cmd_/store/config/code/projects/kernel-modules/hello/hue.o := ld -m elf_x86_64   -r -o /store/config/code/projects/kernel-modules/hello/hue.o /store/config/code/projects/kernel-modules/hello/chardev.o 

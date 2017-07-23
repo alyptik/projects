@@ -1,0 +1,1 @@
+cmd_/store/config/code/projects/kernel-modules/hello/hello-1.ko := ld -r -m elf_x86_64 -T ./scripts/module-common.lds --build-id  -o /store/config/code/projects/kernel-modules/hello/hello-1.ko /store/config/code/projects/kernel-modules/hello/hello-1.o /store/config/code/projects/kernel-modules/hello/hello-1.mod.o ;  true

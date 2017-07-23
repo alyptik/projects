@@ -1,0 +1,1 @@
+cmd_/store/config/code/projects/kernel-modules/hello/hue.ko := ld -r -m elf_x86_64 -T ./scripts/module-common.lds --build-id  -o /store/config/code/projects/kernel-modules/hello/hue.ko /store/config/code/projects/kernel-modules/hello/hue.o /store/config/code/projects/kernel-modules/hello/hue.mod.o ;  true
