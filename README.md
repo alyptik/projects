@@ -1,3 +1,3 @@
 # projects
 
-current projects and miscellaneous code
+Current projects and miscellaneous code
