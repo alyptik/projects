@@ -1,0 +1,9 @@
+*.swn
+*.swo
+*.swp
+*\~
+tags
+a.out
+generic
+/*/
+!/school/
