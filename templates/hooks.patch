@@ -1,7 +1,7 @@
-diff --git a/.config/git/post-commit.hook b/.config/git/post-commit.hook
+diff --git a/.git/hooks/post-commit.hook b/.config/git/post-commit.hook
 index 6f0effa..edba714 100755
---- a/.config/git/post-commit.hook
-+++ b/.config/git/post-commit.hook
+--- a/.git/hooks/post-commit.hook
++++ b/.git/hooks/post-commit.hook
 @@ -1,7 +1,8 @@
 -#!/bin/sh
 +#!/bin/bash
@@ -14,10 +14,10 @@ index 6f0effa..edba714 100755
 +		git add "${tmp}.SRCINFO"
  	fi
  done
-diff --git a/.config/git/pre-commit.hook b/.config/git/pre-commit.hook
+diff --git a/.git/hooks/pre-commit.hook b/.config/git/pre-commit.hook
 index ba75d78..d0be24a 100755
---- a/.config/git/pre-commit.hook
-+++ b/.config/git/pre-commit.hook
+--- a/.git/hooks/pre-commit.hook
++++ b/.git/hooks/pre-commit.hook
 @@ -1,11 +1,12 @@
 -#!/bin/sh
 +#!/bin/bash
@@ -36,10 +36,10 @@ index ba75d78..d0be24a 100755
 +		git add "$tmp"/.SRCINFO
  	fi
  done
-diff --git a/.config/git/prepare-commit-msg.hook b/.config/git/prepare-commit-msg.hook
+diff --git a/.git/hooks/prepare-commit-msg.hook b/.config/git/prepare-commit-msg.hook
 index bffbc3d..28ad6f7 100755
---- a/.config/git/prepare-commit-msg.hook
-+++ b/.config/git/prepare-commit-msg.hook
+--- a/.git/hooks/prepare-commit-msg.hook
++++ b/.git/hooks/prepare-commit-msg.hook
 @@ -1,11 +1,11 @@
  #!/bin/bash
  

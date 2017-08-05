@@ -1,61 +1,76 @@
 #
-# foobar
+# <template> - <template>
 #
-# See LICENSE file for copyright and license details.
+# AUTHOR: Joey Pabalinas <alyptik@protonmail.com>
+# See LICENSE.md file for copyright and license details.
 
-CC ?= gcc
-LD ?= $(CC)
-CFLAGS = -O2 -pipe -MMD -I. -fPIC -fstack-protector-strong -Wall -Wextra -std=c11 -pedantic-errors
-PREFIX ?= $(DESTDIR)/usr/local
-LDFLAGS = -Wl,-O1,--sort-common,--as-needed,-z,relro -Wl,-z,now
-# LDLIBS = $(shell pkg-config --cflags --libs tap)
-TESTS = $(patsubst %.c, %, $(wildcard t/*.c))
-HDR = $(wildcard *.h)
-SRC = $(wildcard *.c)
-OBJ = $(patsubst %.c, %.o,$(wildcard *.c))
-TOBJ = $(patsubst %, %.o, $(TESTS))
+DESTDIR ?=
+PREFIX ?= /usr/local
+CC := gcc
+LD := $(CC)
+TARGET_ARCH ?= -march=x86-64 -mtune=generic
+CFLAGS := -pipe -MMD -flto -fPIC -fstack-protector-strong -fuse-linker-plugin -fuse-ld=gold -std=c11 -Wall -Wextra -Wimplicit-fallthrough=1 -pedantic-errors -D_GNU_SOURCE -D_POSIX_C_SOURCE=200809L -D_XOPEN_SOURCE=700
+LDFLAGS := -pipe -MMD -flto -fPIC -fstack-protector-strong -fuse-linker-plugin -fuse-ld=gold -Wl,-O2,-zrelro,-znow,--sort-common,--as-needed
+LDLIBS :=
+DEBUG := -Og -ggdb
+RELEASE := -O2
+TARGET := <template>
+MANPAGE := <template>.7
+TAP := t/tap
 
-TARGET = "foobar"
+SRC := $(wildcard src/*.c)
+TSRC := $(wildcard t/*.c)
+OBJ := $(patsubst %.c,%.o,$(SRC))
+TOBJ := $(patsubst %.c,%.o,$(TSRC))
+HDR := $(wildcard src/*.h) $(wildcard t/*.h)
+TESTS := $(filter-out $(TAP),$(patsubst %.c,%,$(TSRC)))
+
+all: $(TARGET) check
 
 %:
-	$(CC) $(LDFLAGS) $(TARGET_ARCH) $(filter %.o, $^) $(LDLIBS) -o $@
+	$(LD) $(LDLIBS) $(LDFLAGS) $(TARGET_ARCH) $(filter %.o,$^) -o $@
 
 %.o:
-	$(CC) $(CFLAGS) $(CPPFLAGS) $(TARGET_ARCH) -c $(filter %.c, $^) $(LDLIBS) -o $@
+	$(CC) $(LDLIBS) $(CFLAGS) $(TARGET_ARCH) -c $(filter %.c,$^) -o $@
 
-all: $(TARGET) tests
+debug: CFLAGS := $(DEBUG) $(CFLAGS)
+debug: $(OBJ)
+	$(LD) $(LDLIBS) $(LDFLAGS) $(TARGET_ARCH) $(filter src/%.o,$^) -o $(TARGET)
 
+$(TARGET): CFLAGS := $(RELEASE) $(CFLAGS)
 $(TARGET): $(OBJ)
+
+$(TESTS): %: %.o $(TAP).o $(filter $(subst t/test,src/,%),$(filter-out src/$(TARGET).o,$(OBJ)))
 
 $(OBJ): %.o: %.c $(HDR)
 
-tests: $(TESTS)
-
-$(TESTS): %: %.o $(OBJ)
-
 $(TOBJ): %.o: %.c $(HDR)
 
+check test: tests
+
+tests: $(TESTS)
+
 install: $(TARGET)
-	@printf "\n\t%s\n\n" "installing"
-	mkdir -p $(PREFIX)/bin
-	install -c $(TARGET) $(prefix)/bin
+	@printf "%s\n" "installing"
+	@mkdir -pv $(DESTDIR)$(PREFIX)/bin
+	@mkdir -pv $(DESTDIR)$(PREFIX)/share/man/man7
+	install -c $(TARGET) $(DESTDIR)$(PREFIX)/bin
+	install -c $(MANPAGE) $(DESTDIR)$(PREFIX)/share/man/man7
 
 uninstall:
-	rm $(PREFIX)/bin/$(TARGET)
+	@rm -fv $(DESTDIR)$(PREFIX)/bin/$(TARGET)
+	@rm -fv $(DESTDIR)$(PREFIX)/share/man/man7/$(MANPAGE)
 
 dist: clean
-	@printf "\n\t%s\n\n" "creating dist tarball"
-	mkdir -p $(TARGET)
-	cp -R LICENSE Makefile README.md ${HDR} ${SRC} $(TARGET)
-	tar -cvzf $(TARGET).tar.gz $(TARGET)
-	rm -rfv $(TARGET)
-
-check test: all
-	./t/test
+	@printf "%s\n" "creating dist tarball"
+	@mkdir -pv $(TARGET)/
+	@cp -Rv LICENSE Makefile README.md $(HDR) $(SRC) $(TSRC) $(MANPAGE) $(TARGET)/
+	tar -czf $(TARGET).tar.gz $(TARGET)/
+	@rm -rfv $(TARGET)/
 
 clean:
-	printf "\n\t%s\n\n" "cleaning"
-	rm -fv $(TARGET) $(OBJ) $(TOBJ) $(TESTS) ftree.tar.gz $(wildcard *.d)
+	@printf "%s\n" "cleaning"
+	@rm -fv $(TARGET) $(TESTS) $(OBJ) $(TOBJ) $(TARGET).tar.gz $(wildcard t/*.d) $(wildcard src/*.d)
 
--include $(wildcard *.d)
-.PHONY: all clean install uninstall dist check test tests
+-include $(wildcard src/*.d) $(wildcard t/*.d)
+.PHONY: all clean install uninstall dist debug check test tests

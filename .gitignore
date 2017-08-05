@@ -3,6 +3,9 @@
 *.swp
 *\~
 tags
+TAGS
+*.o
+*.d
 a.out
 generic
 /*/
