@@ -5,6 +5,8 @@
 tags
 TAGS
 *.o
+*.so
+*.ko
 *.d
 a.out
 generic
