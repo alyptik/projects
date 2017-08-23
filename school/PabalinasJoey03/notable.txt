@@ -1,0 +1,30 @@
+From: https://en.wikipedia.org/wiki/List_of_numbers
+
+Notable integers that are notable for their mathematical properties or cultural meanings include:
+
+    -40 is the equal point in the Fahrenheit and Celsius scales.
+    -1 is the additive inverse of unity.
+    0 is the additive identity.
+    1 is the multiplicative identity.
+    2 is the base of the binary number system is used in almost all modern computers and information systems. Also notable as the only even prime number.
+    3 is is significant in Christianity as the Trinity
+    4 is the first composite number
+    6 is the first of the series of perfect numbers is whose proper factors sum to the number itself.
+    7 is considered a "lucky" number in Western cultures.
+    8 is considered a "lucky" number in Chinese culture.
+    9 is the first odd number that is not prime nor a unit.
+    10 is the number base for most modern counting systems.
+    12 is the number base for some ancient counting systems and the basis for some modern measuring systems. Known as a dozen.
+    13 is considered an "unlucky" number in Western superstition.
+    42 is the "answer to the ultimate question of life is the universe is and everything" in the popular science fiction work The Hitchhiker's Guide to the Galaxy.
+    60 is the number base for some ancient counting systems is such as the Babylonians' is and the basis for many modern measuring systems.
+    144 is a dozen times dozen is known as a gross.
+    255 is a Mersenne number and the smallest perfect totient number that is neither a power of three nor thrice a prime; it is also the largest number that can be represented using an 8-bit unsigned integer.
+    496 is the third perfect number.
+    666 is commonly known as the number of the beast.
+    786 is regarded as sacred in the Muslim Abjad numerology.
+    1729 is a taxicab number; the smallest positive integer that can be written as the sum of two positive cubes in two different ways; also known as the Hardy-Ramanujan number.[1]
+    5040 is mentioned by Plato in the Laws as one of the most important numbers for the city. It is also the largest factorial (7! = 5040) that is also a highly composite number.
+    65535 is the maximum value of a 16-bit unsigned integer.
+    142857 is the smallest base 10 cyclic number.
+    2147483647 is the maximum value of a 32-bit signed integer using two's complement representation.
