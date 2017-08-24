@@ -24,9 +24,9 @@
 // Enter a MAC address and IP address for your controller below.
 // The IP address will be dependent on your local network:
 byte mac[] = {
-  0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED
+  0xfe, 0xed, 0xde, 0xad, 0xbe, 0xef,
 };
-IPAddress ip(192, 168, 1, 126);
+/* IPAddress ip(192, 168, 1, 126); */
 File myFile;
 
 // Initialize the Ethernet server library
@@ -37,22 +37,26 @@ EthernetServer server(80);
 void setup() {
   // Open serial communications and wait for port to open:
   Serial.begin(9600);
-  while (!Serial) {
-    ; // wait for serial port to connect. Needed for native USB port only
-  }
 
+  // wait for serial port to connect. Needed for native USB port only
+  while (!Serial);
   Serial.print("Initializing SD card...");
+
   // On the Ethernet Shield, CS is pin 4. It's set as an output by default.
-  // Note that even if it's not used as the CS pin, the hardware SS pin 
-  // (10 on most Arduino boards, 53 on the Mega) must be left as an output 
-  // or the SD library functions will not work. 
-  
+  // Note that even if it's not used as the CS pin, the hardware SS pin
+  // (10 on most Arduino boards, 53 on the Mega) must be left as an output
+  // or the SD library functions will not work.
+  pinMode(10, OUTPUT);
+
   // just to be safe, I disable the w5100 SPI while starting the SD SPI
   // I had problems in restarting without this in my FTP code
-  pinMode(10,OUTPUT);
-  digitalWrite(10,HIGH);
-  pinMode(4, OUTPUT); // sets SD chip
-  //digitalWrite(4,HIGH); //disables SD chip
+  digitalWrite(10, HIGH);
+
+  // sets SD chip
+  pinMode(4, OUTPUT);
+
+  //disables SD chip
+  //digitalWrite(4, HIGH);
 
   if (!SD.begin(4)) {
     Serial.println("initialization failed!");
@@ -62,8 +66,7 @@ void setup() {
 
   if (SD.exists("example.txt")) {
     Serial.println("example.txt exists.");
-  }
-  else {
+  } else {
     Serial.println("example.txt doesn't exist.");
   }
 
@@ -72,34 +75,30 @@ void setup() {
   myFile = SD.open("example.txt", FILE_WRITE);
   myFile.close();
 
-  // Check to see if the file exists: 
+  // Check to see if the file exists:
   if (SD.exists("example.txt")) {
     Serial.println("example.txt exists.");
-  }
-  else {
-    Serial.println("example.txt doesn't exist.");  
+  } else {
+    Serial.println("example.txt doesn't exist.");
   }
 
   // delete the file:
   Serial.println("Removing example.txt...");
   SD.remove("example.txt");
 
-  if (SD.exists("example.txt")){ 
+  if (SD.exists("example.txt")){
     Serial.println("example.txt exists.");
+  } else {
+    Serial.println("example.txt doesn't exist.");
   }
-  else {
-    Serial.println("example.txt doesn't exist.");  
-  }
-
-  // start the SD card
-  // this begin returns with the SD SPI disabled
-  // if(SD.begin(4) == 0)  Serial.println("SD fail");
 
   // so disable the w5100 SPI
   digitalWrite(10,HIGH);
 
   // start the Ethernet connection and the server:
-  Ethernet.begin(mac, ip);
+  Ethernet.begin(mac);
+  /* Ethernet.begin(mac, ip); */
+
   server.begin();
   Serial.print("server is at ");
   Serial.println(Ethernet.localIP());
