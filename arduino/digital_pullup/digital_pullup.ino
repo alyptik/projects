@@ -38,8 +38,7 @@ void loop() {
   // Keep in mind the pull-up means the pushbutton's logic is inverted. It goes
   // HIGH when it's open, and LOW when it's pressed. Turn on pin 13 when the
   // button's pressed, and off when it's not:
-  if (sensorVal == HIGHz ardu
-  ) {
+  if (sensorVal == HIGH) {
     digitalWrite(13, LOW);
   } else {
     digitalWrite(13, HIGH);
