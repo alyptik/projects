@@ -32,7 +32,7 @@ class PabalinasJoey04 {
 			System.out.println("Please enter the INPUT file name as the 1st commandline argument.");
 			System.out.println("Please enter the OUTPUT file name as the 2nd commandline argument.");
 			System.out.println("Please enter exactly two (2) commandline arguments.");
-		// Immediately terminates program
+			// Immediately terminates program
 			System.exit(1);
 		}// end of if
 		// if no commandline argument errors, continue program
@@ -63,25 +63,22 @@ class PabalinasJoey04 {
 		final Integer QUIT = new Integer(4);
 		// if the user does NOT want to QUIT, keep looping
 		while (false == choice.equals(QUIT)) {
-		// get the user's choice
+			// get the user's choice
 			choice = PabalinasJoey04.displayMenu();
-		// add grocery item
+			// add grocery item
 			if (choice.equals(1)) {
-			size = PabalinasJoey04.add(itemNames, itemNumbers, storeNames, size);
-			}
-			// delete grocery item
-			else if (choice.equals(2)) {
-			size = PabalinasJoey04.delete(itemNames, itemNumbers, storeNames, size);
-			}
+				size = PabalinasJoey04.add(itemNames, itemNumbers, storeNames, size);
+			} else if (choice.equals(2)) {
+				// delete grocery item
+				size = PabalinasJoey04.delete(itemNames, itemNumbers, storeNames, size);
+			} else if (choice.equals(3)) {
 				// display grocery item
-			else if (choice.equals(3)) {
-			PabalinasJoey04.display(itemNames, itemNumbers, storeNames, size);
-			}
+				PabalinasJoey04.display(itemNames, itemNumbers, storeNames, size);
+			} else if (false == choice.equals(QUIT)) {
 				// error message
-			else if (false == choice.equals(QUIT)) {
-			System.out.println("ERROR: Please enter an integer in the range from 1 to 4");
+				System.out.println("ERROR: Please enter an integer in the range from 1 to 4");
 			}
-		}// end of "while"
+		}
 
 		// write to from grocery list array to OUTPUT file
 		PabalinasJoey04.writeToFile(commandlineArguments[1],
