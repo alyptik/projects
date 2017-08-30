@@ -1,0 +1,52 @@
+########################################
+# Syntax Coloring Map For RGBLED
+########################################
+
+########################################
+# Datatypes (KEYWORD1)
+########################################
+
+# Enumerators
+CommonElectrode					KEYWORD1
+State							KEYWORD1
+
+# Classes
+RGBLED							KEYWORD1
+
+########################################
+# Methods and Functions (KEYWORD2)
+########################################
+
+# Global functions
+RGBLED_DEBUG					KEYWORD2
+RGBLED_DEBUGLN					KEYWORD2
+
+# class RGBLED
+on								KEYWORD2
+off								KEYWORD2
+state							KEYWORD2
+brightness						KEYWORD2
+red								KEYWORD2
+green							KEYWORD2
+blue							KEYWORD2
+red_correction					KEYWORD2
+green_correction				KEYWORD2
+blue_correction					KEYWORD2
+show							KEYWORD2
+
+
+########################################
+# Constants (LITERAL1)
+########################################
+
+# Global constants
+PWM_MAX							LITERAL1
+RGBLED_debug					LITERAL1
+
+# enum CommonElectrode
+anode							LITERAL1
+cathode							LITERAL1
+
+# enum State
+ON								LITERAL1
+OFF								LITERAL1

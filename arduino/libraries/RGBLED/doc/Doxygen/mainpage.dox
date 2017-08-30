@@ -1,0 +1,8 @@
+/**
+@mainpage RGBLED
+
+/**
+@example hello_world.ino
+
+This example demonstrates the usage of different methods of the RGBLED class.
+*/

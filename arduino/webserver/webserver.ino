@@ -34,13 +34,10 @@ File myFile;
 // (port 80 is default for HTTP):
 EthernetServer server(80);
 
-void setup() {
-  // Open serial communications and wait for port to open:
-  Serial.begin(9600);
-
-  // wait for serial port to connect. Needed for native USB port only
-  while (!Serial);
-  Serial.print("Initializing SD card...");
+void setup()
+{
+  if (Serial)
+    serialStart();
 
   // On the Ethernet Shield, CS is pin 4. It's set as an output by default.
   // Note that even if it's not used as the CS pin, the hardware SS pin
@@ -59,37 +56,46 @@ void setup() {
   //digitalWrite(4, HIGH);
 
   if (!SD.begin(4)) {
-    Serial.println("initialization failed!");
+    if (Serial)
+      Serial.println("initialization failed!");
     return;
   }
   Serial.println("initialization done.");
 
   if (SD.exists("example.txt")) {
-    Serial.println("example.txt exists.");
+    if (Serial)
+      Serial.println("example.txt exists.");
   } else {
-    Serial.println("example.txt doesn't exist.");
+    if (Serial)
+      Serial.println("example.txt doesn't exist.");
   }
 
   // open a new file and immediately close it:
-  Serial.println("Creating example.txt...");
+  if (Serial)
+    Serial.println("Creating example.txt...");
   myFile = SD.open("example.txt", FILE_WRITE);
   myFile.close();
 
   // Check to see if the file exists:
   if (SD.exists("example.txt")) {
-    Serial.println("example.txt exists.");
+    if (Serial)
+      Serial.println("example.txt exists.");
   } else {
-    Serial.println("example.txt doesn't exist.");
+    if (Serial)
+      Serial.println("example.txt doesn't exist.");
   }
 
   // delete the file:
-  Serial.println("Removing example.txt...");
+  if (Serial)
+    Serial.println("Removing example.txt...");
   SD.remove("example.txt");
 
   if (SD.exists("example.txt")){
-    Serial.println("example.txt exists.");
+    if (Serial)
+      Serial.println("example.txt exists.");
   } else {
-    Serial.println("example.txt doesn't exist.");
+    if (Serial)
+      Serial.println("example.txt doesn't exist.");
   }
 
   // so disable the w5100 SPI
@@ -100,18 +106,20 @@ void setup() {
   /* Ethernet.begin(mac, ip); */
 
   server.begin();
-  Serial.print("server is at ");
-  Serial.println(Ethernet.localIP());
+    if (Serial)
+      serialEnd();
 }
 
 
-void loop() {
+void loop()
+{
   // listen for incoming clients
   EthernetClient client = server.available();
   if (client) {
     Serial.println("new client");
     // an http request ends with a blank line
     boolean currentLineIsBlank = true;
+    boolean button_on[6] = {false, false, false, false, false, false};
     while (client.connected()) {
       if (client.available()) {
         char c = client.read();
@@ -131,10 +139,15 @@ void loop() {
           // output the value of each analog input pin
           for (int analogChannel = 0; analogChannel < 6; analogChannel++) {
             int sensorReading = analogRead(analogChannel);
+              
+            if (sensorReading == 0)
+                button_on[analogChannel] = button_on[analogChannel] ? false : true;
+                
             client.print("analog input ");
             client.print(analogChannel);
             client.print(" is ");
             client.print(sensorReading);
+//            client.print(button_on[analogChannel] ? 0 : sensorReading);
             client.println("<br />");
           }
           client.println("</html>");
@@ -158,3 +171,19 @@ void loop() {
   }
 }
 
+void serialStart()
+{
+  // Open serial communications and wait for port to open:
+  Serial.begin(9600);
+
+  // wait for serial port to connect. Needed for native USB port only
+  while (!Serial);
+  Serial.print("Initializing SD card...");
+}
+
+void serialEnd()
+{
+  // print ip address
+  Serial.print("server is at ");
+  Serial.println(Ethernet.localIP());
+}
