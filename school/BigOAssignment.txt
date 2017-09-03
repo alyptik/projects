@@ -63,8 +63,7 @@ n²
 O(n²)
 
 // problem 10
-// quadratic time
+// polylogarithmic time
 counter = log2(n) * log2(n) * log2(n)
-3log2(n)
-log2(n)
-O(log n)
+(log2(n))³
+O((log n)³)
