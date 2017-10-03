@@ -23,6 +23,7 @@
 	char *: "pointer to char", \
 	void *: "pointer to void",	 \
 	int *: "pointer to int", \
+	complex long double: "complex long double", \
 	default: "other")
 
 #define fmt "%30s is '%s'\n"
@@ -44,7 +45,7 @@
 	long double: "'%Lf'", \
 	char *: "'%s'", \
 	void *: "'%p'", \
-	complex: "'%llfi'", \
+	complex long double: "'%Li'", \
 	default: "'%lld")
 #define print(x) printf(printf_dec_format(x), x)
 #define printnl(x) printf(printf_dec_format(x), x), printf("\n");
@@ -54,9 +55,9 @@ int main(int argc, char **argv) {
 	ptrdiff_t p;
 	intmax_t i;
 	int ai[3] = {0};
-	double complex z = 4.0F + 3.0F * I;
+	complex long double z = 4.0F + 3.0F * I;
 
-	printf(fmt fmt fmt fmt fmt fmt fmt fmt "\n",
+	printf(fmt fmt fmt fmt fmt fmt fmt fmt fmt"\n",
 		"\"size_t\" s", typename(s),
 		"\"ptrdiff_t\" p", typename(p),
 		"\"intmax_t\" i", typename(i),
@@ -64,10 +65,13 @@ int main(int argc, char **argv) {
 		"\"0x7FFFFFFF\"", typename(0x7FFFFFFF),
 		"\"0xFFFFFFFF\"", typename(0xFFFFFFFF),
 		"\"0x7FFFFFFFU\"", typename(0x7FFFFFFFU),
-		"\"array of int\" ai[3]", typename(ai));
+		"\"array of int\" ai[3]", typename(ai),
+		"\"complex long double\" z", typename(z));
 
-	printf("%30s is ", "\"4.0 + 3.0i\"");
+	printf("%20s has an imaginary part of ", "\"4.0 + 3.0i\"");
 	printnl(cimagl(z));
+	printf("%20s has a real part of ", "\"4.0 + 3.0i\"");
+	printnl(creall(z));
 
 	return 0;
 }
