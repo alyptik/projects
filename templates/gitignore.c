@@ -5,7 +5,9 @@ vgcore*
 
 # Binaries
 cepl
-t/test
+t/*
+!t/*.c
+!t/*.h
 
 # Object files
 *.o
@@ -41,3 +43,6 @@ t/test
 # Debug files
 *.dSYM/
 *.su
+.cepl_history
+*.tar.gz
+debug.mk

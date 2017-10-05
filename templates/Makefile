@@ -4,73 +4,53 @@
 # AUTHOR: Joey Pabalinas <alyptik@protonmail.com>
 # See LICENSE.md file for copyright and license details.
 
-DESTDIR ?=
-PREFIX ?= /usr/local
-CC := gcc
-LD := $(CC)
-TARGET_ARCH ?= -march=x86-64 -mtune=generic
-CFLAGS := -pipe -MMD -flto -fPIC -fstack-protector-strong -fuse-linker-plugin -fuse-ld=gold -std=c11 -Wall -Wextra -Wimplicit-fallthrough=1 -pedantic-errors -D_GNU_SOURCE -D_POSIX_C_SOURCE=200809L -D_XOPEN_SOURCE=700
-LDFLAGS := -pipe -MMD -flto -fPIC -fstack-protector-strong -fuse-linker-plugin -fuse-ld=gold -Wl,-O2,-zrelro,-znow,--sort-common,--as-needed
-LDLIBS :=
-DEBUG := -Og -ggdb
-RELEASE := -O2
-TARGET := <template>
-MANPAGE := <template>.7
-TAP := t/tap
+all:
+	$(MAKE) $(TARGET) check
 
-SRC := $(wildcard src/*.c)
-TSRC := $(wildcard t/*.c)
-OBJ := $(patsubst %.c,%.o,$(SRC))
-TOBJ := $(patsubst %.c,%.o,$(TSRC))
-HDR := $(wildcard src/*.h) $(wildcard t/*.h)
-TESTS := $(filter-out $(TAP),$(patsubst %.c,%,$(TSRC)))
+# user configuration
+MKCFG := config.mk
+# if previously built with `-fsanitize=address` we have to use `DEBUG` flags
+OPT != test -f debug.mk
+ifeq ($(.SHELLSTATUS), 0)
+	OLVL = $(DEBUG)
+endif
+-include $(DEP) $(MKCFG)
+.PHONY: all check clean debug dist install test uninstall $(MKALL)
 
-all: $(TARGET) check
+debug:
+	# debug indicator flag
+	@touch debug.mk
+	@rm -f $(TARGET)
+	$(MAKE) $(TARGET) check
 
-%:
-	$(LD) $(LDLIBS) $(LDFLAGS) $(TARGET_ARCH) $(filter %.o,$^) -o $@
+$(TARGET): %: $(OBJ)
+	$(LD) $(LDFLAGS) $(OLVL) $(LIBS) $^ -o $@
+$(TEST): %: %.o $(TAP).o $(OBJ)
+	$(LD) $(LDFLAGS) $(OLVL) $(LIBS) $(TAP).o $(<:t/test%=src/%) $< -o $@
+%.d %.o: %.c
+	$(CC) $(CFLAGS) $(OLVL) $(CPPFLAGS) -c $< -o $@
 
-%.o:
-	$(CC) $(LDLIBS) $(CFLAGS) $(TARGET_ARCH) -c $(filter %.c,$^) -o $@
-
-debug: CFLAGS := $(DEBUG) $(CFLAGS)
-debug: $(OBJ)
-	$(LD) $(LDLIBS) $(LDFLAGS) $(TARGET_ARCH) $(filter src/%.o,$^) -o $(TARGET)
-
-$(TARGET): CFLAGS := $(RELEASE) $(CFLAGS)
-$(TARGET): $(OBJ)
-
-$(TESTS): %: %.o $(TAP).o $(filter $(subst t/test,src/,%),$(filter-out src/$(TARGET).o,$(OBJ)))
-
-$(OBJ): %.o: %.c $(HDR)
-
-$(TOBJ): %.o: %.c $(HDR)
-
-check test: tests
-
-tests: $(TESTS)
-
+test check: $(TOBJ) $(TEST)
+	./t/testcompile
+	./t/testhist
+	./t/testparseopts
+	echo "test string" | ./t/testreadline
+	./t/testvars
+clean:
+	@echo "cleaning"
+	@rm -fv $(DEP) $(TARGET) $(TEST) $(OBJ) $(TOBJ) $(TARGET).tar.gz debug.mk
 install: $(TARGET)
-	@printf "%s\n" "installing"
-	@mkdir -pv $(DESTDIR)$(PREFIX)/bin
-	@mkdir -pv $(DESTDIR)$(PREFIX)/share/man/man7
-	install -c $(TARGET) $(DESTDIR)$(PREFIX)/bin
-	install -c $(MANPAGE) $(DESTDIR)$(PREFIX)/share/man/man7
-
+	@echo "installing"
+	@mkdir -pv $(DESTDIR)$(PREFIX)/$(BINDIR)
+	@mkdir -pv $(DESTDIR)$(PREFIX)/$(MANDIR)
+	install -c $(TARGET) $(DESTDIR)$(PREFIX)/$(BINDIR)
+	install -c $(MANPAGE) $(DESTDIR)$(PREFIX)/$(MANDIR)
 uninstall:
-	@rm -fv $(DESTDIR)$(PREFIX)/bin/$(TARGET)
-	@rm -fv $(DESTDIR)$(PREFIX)/share/man/man7/$(MANPAGE)
-
+	@rm -fv $(DESTDIR)$(PREFIX)/$(BINDIR)/$(TARGET)
+	@rm -fv $(DESTDIR)$(PREFIX)/$(MANDIR)/$(MANPAGE)
 dist: clean
-	@printf "%s\n" "creating dist tarball"
+	@echo "creating dist tarball"
 	@mkdir -pv $(TARGET)/
-	@cp -Rv LICENSE Makefile README.md $(HDR) $(SRC) $(TSRC) $(MANPAGE) $(TARGET)/
+	@cp -Rv LICENSE.md Makefile README.md $(HDR) $(SRC) $(TSRC) $(MANPAGE) $(TARGET)/
 	tar -czf $(TARGET).tar.gz $(TARGET)/
 	@rm -rfv $(TARGET)/
-
-clean:
-	@printf "%s\n" "cleaning"
-	@rm -fv $(TARGET) $(TESTS) $(OBJ) $(TOBJ) $(TARGET).tar.gz $(wildcard t/*.d) $(wildcard src/*.d)
-
--include $(wildcard src/*.d) $(wildcard t/*.d)
-.PHONY: all clean install uninstall dist debug check test tests
