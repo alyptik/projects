@@ -1,21 +1,14 @@
 /**
  * This program reads fields from
- * a .csv file into an array
- * of StarHouses objects, appropriately
- * sets their data members, and
- * prints the results. It then
- * instantiates a new array of objects,
- * sorts the original array with a
- * comparison-free radix sort (against
- * the `degree` data field) then instantiates
- * the now-sorted fields of the first array
- * and prints them after using the compareTo()
- * method to make sure the objects were sorrted
- * properly.
+ * a .txt file into an array
+ * of String objects, uses the
+ * Sorting.quickSort() method to
+ * sort the array, and finally prints
+ * out the sorted list of Strings.
  *
  * @author Pabalinas, Joey
  * ICS 211 Assignment 12
- * 10/06/17
+ * 10/08/17
  *
  */
 
@@ -25,8 +18,6 @@ import java.util.*;
 import static java.lang.System.*;
 
 public class PabalinasJoey12 {
-	// range of a byte
-	private static final int BASE = 256;
 	/**
 	 * The "main" method starts the program
 	 * @param args the first argument is passed to the methods
@@ -34,7 +25,7 @@ public class PabalinasJoey12 {
 	public static void main(String[] args)
 	{
 		// declare variables to hold arguments
-		ArrayList<Integer> wordList = new ArrayList<>();
+		String[] wordList;
 
 		if (args.length < 1) {
 			System.out.println("Please enter a filename");
@@ -48,7 +39,7 @@ public class PabalinasJoey12 {
 				throw new NullPointerException();
 
 			// print fields
-			radixSort(wordList);
+			printSortedStrings(args[0], wordList);
 
 		// catch exceptions
 		} catch (Exception e) {
@@ -58,15 +49,15 @@ public class PabalinasJoey12 {
 
 	/**
 	 * The "readFile" method reads data from a file and
-	 * returns an array of ArrayList<Integer>
+	 * returns an array of Strings
 	 * @param inputFile the file to read
 	 * @return the array
 	 */
-	private static ArrayList<Integer> readFile(String inputFile) {
+	private static String[] readFile(String inputFile) {
 		// connect to file (does NOT create new file)
 		File file = new File(inputFile);
 		Scanner scanFile = null;
-		ArrayList<Integer> words = new ArrayList<>();
+		ArrayList<String> words = new ArrayList<>();
 
 		try {
 			scanFile = new Scanner(file);
@@ -80,7 +71,6 @@ public class PabalinasJoey12 {
 
 		// if made connection to file, read from file
 		if (scanFile != null) {
-			int idx = 0;
 			while (scanFile.hasNextLine()) {
 				// get a line of text..
 				String line = scanFile.nextLine();
@@ -88,119 +78,57 @@ public class PabalinasJoey12 {
 				Scanner lineInput = new Scanner(line).useDelimiter(" ");
 				while (lineInput.hasNext()) {
 					String word = lineInput.next();
-					int intRep = 0;
-					// convert string to an array of consecutive ints
-					for (int i = 0; i < word.length(); i++) {
-						intRep += (((int) (word.charAt(i))) << (i * 8));
-						// System.out.println(i + " " + intRep);
-					}
-
-					words.add(intRep);
-					System.out.println("index = [" + idx + "]:\t" +
-						word + ": " + Math.abs(intRep));
-					idx++;
+					words.add(word);
 				}
 			}
 
-			return words;
+			String[] ret = new String[words.size()];
+			for (int i = 0; i < words.size(); i++)
+				ret[i] = words.get(i);
+			return ret;
 		}
 
 		return null;
 	}
 
+	/**
+	 * This method sorts and prints a String[]
+	 *
+	 * @param fileName the name of the file that was sorted
+	 * @param array the array to print
+	 */
+	private static void printSortedStrings(String fileName, String[] array)
+	{
+		int idx = 0;
+		Sorting.display = false;
+		Sorting.quickSort(array, 0, array.length - 1);
+		System.out.println("\nSorted array of Strings read from \"" + fileName + "\"\n");
+		for (String word : array)
+			System.out.println("index = [" + idx++ + "]:\t\"" + word + "\"");
+	}
 
 	/**
-	 * This method compares two Integers
+	 * This method compares two Strings
 	 *
-	 * @param a the first int
-	 * @param b the second int
+	 * @param a the first String
+	 * @param b the second String
 	 * @return this method returns -1, 0, and 1 for
 	 * a if less than b, equal to b, and greater than b
 	 * respectively
 	 */
-	private static int compareTo(int a, int b)
+	private static int compareTo(String a, String b)
 	{
-		return (a > b ? 1 : 0) - (a < b ? 1 : 0);
-	}
+		int ret = (a.charAt(0) > b.charAt(0) ? 1 : 0) - (a.charAt(0) < b.charAt(0) ? 1 : 0);
 
-	/**
-	 * This method gives maximum value in ArrayList<Integer>
-	 *
-	 * @param inputArray the map to test
-	 * @return the largest member
-	 */
-	private static int getMax(ArrayList<Integer> inputArray)
-	{
-		int max = inputArray.get(0);
-		for (int i = 1; i < inputArray.size(); i++) {
-			if (compareTo(inputArray.get(i), max) > 0) {
-				max = inputArray.get(i);
-			}
+		if (a.length() < 2 && b.length() < 2) {
+			return 0;
+		} else if (b.length() > 2) {
+			return -1;
+		} else if (a.length() > 2) {
+			return 1;
+		} else {
+			return ((ret != 0) ? ret : compareTo(a.substring(1), b.substring(1)));
 		}
-		return max;
-	}
-
-	/**
-	 * This method sorts this an ArrayList<Integer>
-	 *
-	 * @param inputArray the array to sort
-	 * @return the old array
-	 */
-	private static ArrayList<Integer> radixSort(ArrayList<Integer> inputArray)
-	{
-		int radix = 1, len = inputArray.size();
-		int largest = getMax(inputArray);
-		int[] result = new int[len];
-		int[] input = new int[len];
-		ArrayList<Integer> sorted = new ArrayList<>();
-		ArrayList<String> words = new ArrayList<>();
-
-		for (int i = 0; i < len; i++)
-			input[i] = inputArray.get(i);
-
-		while (largest / radix > 0) {
-			int[] idxArray = new int[BASE];
-
-			/* store the count of "keys" or digits in idxArray[] */
-			for (int i = 0; i < BASE; i++) {
-				idxArray[input[i] / radix % BASE]++;
-			}
-
-			/* change idxArray[i] so that idxArray[i] now contains actual */
-			/* position of this digit in result[] */
-			for (int i = 1; i < BASE; i++) {
-				idxArray[i] += idxArray[i - 1];
-			}
-
-			/* build the resulting array */
-			for (int i = len - 1; i >= 0; i--) {
-				result[(idxArray[(input[i] / radix) % BASE] - 1)] = input[i];
-				idxArray[(input[i] / radix) % BASE]--;
-			}
-
-			/* now main array sortedArray[] contains sorted */
-			/* objects according to degree digit place */
-			System.arraycopy(result, 0, input, 0, len);
-
-			/* move to next digit place */
-			radix *= BASE;
-		}
-
-		for (int i = result.length - 1; i >= 0; i--) {
-			sorted.add(result[i]);
-			// convert an array of consecutive ints to string
-			int letterIdx = 0;
-			char cur = 0;
-			StringBuilder word = new StringBuilder();
-			while ((cur = (char)((result[i] >> (letterIdx * 8)) & 0xff)) != 0) {
-				word.append(cur);
-				System.out.println("0x"+cur);
-			}
-			words.add(word.toString());
-			System.out.println("index = [" + i + "]:\t" + words.get(i));
-		}
-
-		return sorted;
 	}
 
 }
