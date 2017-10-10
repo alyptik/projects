@@ -16,3 +16,4 @@ generic
 !/arduino/
 /arduino/elegoo/
 foo
+print_msg
