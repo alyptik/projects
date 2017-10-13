@@ -101,16 +101,8 @@ public class PabalinasJoey13 {
 				while (ch != -1) {
 					// number
 					if (ch >= '0' && ch <= '9') {
-						int startPos = pos;
-						while ((ch >= '0' && ch <= '9'))
-							nextChar();
-						outputStack.push(str.charAt(startPos++));
-						System.out.println(outputStack.peek());
-						while (pos - startPos > 0) {
-							outputStack.push(str.charAt(startPos++));
-							System.out.println(outputStack.peek());
-							outputStack.push(':');
-						}
+						outputStack.push((char)ch);
+						nextChar();
 						continue;
 
 					// no operators on the stack
@@ -206,18 +198,7 @@ public class PabalinasJoey13 {
 				while (ch != -1) {
 					// number
 					if (ch >= '0' && ch <= '9') {
-						//evalStack.push(Double.parseDouble(str.substring(pos, pos + 1)));
-						String temp = "";
-						while (str.charAt(pos) != ':') {
-							if (str.charAt(pos) == ' ') {
-								nextChar();
-								continue;
-							}
-							System.out.println(temp);
-							temp += str.charAt(pos);
-							nextChar();
-						}
-						evalStack.push(Double.parseDouble(temp));
+						evalStack.push(Double.parseDouble(str.substring(pos, pos + 1)));
 						nextChar();
 						continue;
 
