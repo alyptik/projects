@@ -1,11 +1,13 @@
 /**
  * This program reads lines from
- * a .txt file into an array
+ * a text file into an array
  * of String objects, uses the
  * eval() method to parse and
- * evaluate each line, finally
- * printing the expression and
- * result of evaluation.
+ * evaluate each line (using the
+ * Shunting-yard algorithm),
+ * finally printing the infix/postfix
+ * expressions and the result of
+ * evaluation.
  *
  * @author Pabalinas, Joey
  * ICS 211 Assignment 13
@@ -126,6 +128,8 @@ public class PabalinasJoey13 {
 						while (!operatorStack.empty()
 								&& (cur == '+'
 								|| cur == '-'
+								|| cur == 'x'
+								|| cur == 'X'
 								|| cur == '*'
 								|| cur == '/'
 								|| cur == '%')) {
@@ -136,11 +140,15 @@ public class PabalinasJoey13 {
 						break;
 
 					// multiplication ops
+					case 'x': /* fallthrough */
+					case 'X': /* fallthrough */
 					case '*': /* fallthrough */
 					case '/': /* fallthrough */
 					case '%':
 						while (!operatorStack.empty()
-								&& (cur == '*'
+								&& (cur == 'x'
+								|| cur == 'X'
+								|| cur == '*'
 								|| cur == '/'
 								|| cur == '%')) {
 							outputStack.push(operatorStack.pop());
@@ -225,6 +233,8 @@ public class PabalinasJoey13 {
 							break;
 
 						// a * b
+						case 'x': /* fallthrough */
+						case 'X': /* fallthrough */
 						case '*':
 							b = evalStack.pop();
 							a = evalStack.pop();
@@ -318,7 +328,9 @@ public class PabalinasJoey13 {
 				double x = parseFactor();
 				for (;;) {
 					// multiplication
-					if (eat('*')) {
+					if (eat('x')
+						|| eat('X')
+						|| eat('*')) {
 						x *= parseFactor();
 						// division
 					} else if (eat('/')) {
