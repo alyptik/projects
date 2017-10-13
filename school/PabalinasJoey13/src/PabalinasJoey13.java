@@ -1,14 +1,15 @@
 /**
- * This program reads fields from
+ * This program reads lines from
  * a .txt file into an array
  * of String objects, uses the
- * Sorting.quickSort() method to
- * sort the array, and finally prints
- * out the sorted list of Strings.
+ * eval() method to parse and
+ * evaluate each line, finally
+ * printing the expression and
+ * result of evaluation.
  *
  * @author Pabalinas, Joey
  * ICS 211 Assignment 13
- * 10/11/17
+ * 10/12/17
  *
  */
 
@@ -27,6 +28,7 @@ public class PabalinasJoey13 {
 		// declare variables to hold arguments
 		String[] exprList;
 
+		// sanity check
 		if (args.length < 1) {
 			System.out.println("Please enter a filename");
 			exit(1);
@@ -38,14 +40,20 @@ public class PabalinasJoey13 {
 			if ((exprList = readFile(args[0])) == null)
 				throw new NullPointerException();
 
-			// print fields
-			//printSortedStrings(args[0], wordList);
-
-			for (int i = 0; i < exprList.length; i++) {
+			// parse and evaluate each line as one expression
+			for (String expr : exprList) {
 				// evaluate lines
-				double result = evalInfix(exprList[i]);
-				System.out.println("Infix expression = " + exprList[i]);
-				System.out.println("Result = " + result + "\n");
+				ArrayList<String> result = eval(expr);
+				result.add(evalInfix(expr) + "\n");
+				// print results
+				System.out.println("Infix expression = "
+					+ expr);
+				System.out.println("Postfix expression = "
+					+ result.get(0));
+				System.out.println("Evaluation result (postfix) = "
+					+ result.get(1));
+				System.out.println("Evaluation result (infix) = "
+					+ result.get(2));
 			}
 
 		// catch exceptions
@@ -55,213 +63,204 @@ public class PabalinasJoey13 {
 	}
 
 	/**
-	 * This method sorts and prints a String[]
+	 * This method converts an infix
+	 * expression to RPN and returns
+	 * the postfix expression and
+	 * the result of evaluating it
 	 *
-	 * @param fileName the name of the file that was sorted
-	 * @param array the array to print
-	 */
-	private static void printSortedStrings(String fileName, String[] array)
-	{
-		int idx = 0;
-		Sorting.display = false;
-		Sorting.quickSort(array, 0, array.length - 1);
-		System.out.println("\nSorted array of Strings read from \"" + fileName + "\"\n");
-		for (String word : array)
-			System.out.println("index = [" + idx++ + "]:\t\"" + word + "\"");
-	}
-
-	/**
-	 * This method evaluates a postfix expression
-	 * and returns the result
-	 *
-	 * @param str the expression
+	 * @param inputStr the expression
 	 * @return the result
 	 */
-	private static double evalPostfix(final String str) throws EmptyStackException
+	private static ArrayList<String> eval(final String inputStr) throws EmptyStackException
 	{
 		return new Object() {
 			int pos = -1, ch;
+			String str = "", exprRPN = "";
 			ArrayStack<Character> outputStack = new ArrayStack<>();
 			ArrayStack<Character> operatorStack = new ArrayStack<>();
+			ArrayStack<Character> finalStack = new ArrayStack<>();
 
+			/**
+			 * This method increments the string index
+			 *
+			 */
 			void nextChar()
 			{
 				ch = (++pos < str.length()) ? str.charAt(pos) : -1;
 			}
 
-			double parse()
+			/**
+			 * This method parses an infix expression
+			 *
+			 * @return the result
+			 */
+			ArrayList<String> parse()
 			{
-				String exprRPN = null;
-
+				str = inputStr;
 				nextChar();
 				while (ch != -1) {
+					// number
 					if (ch >= '0' && ch <= '9') {
-						// outputStack.push(str.charAt(pos));
+						// int startPos = pos;
+						// while ((ch >= '0' && ch <= '9'))
+						//	nextChar();
+						// outputStack.push(Double.parseDouble(str.substring(startPos, pos)));
 						outputStack.push((char)ch);
-					} else if (operatorStack.empty()) {
-						// operatorStack.push(str.charAt(pos));
-						operatorStack.push((char)ch);
-					} else {
-						int cur = operatorStack.peek();
-
-						switch (ch) {
-						case '(':
-							operatorStack.push((char)cur);
-							break;
-						case '+': /* fallthrough */
-						case '-':
-							while (!operatorStack.empty() &&
-									(cur == '+' ||
-									cur == '-' ||
-									cur == '*' ||
-									cur == '/' ||
-									cur == '%')) {
-								outputStack.push((char)cur);
-								operatorStack.pop();
-							}
-							operatorStack.push((char)ch);
-							break;
-
-						case '*': /* fallthrough */
-						case '/': /* fallthrough */
-						case '%':
-							while (!operatorStack.empty() &&
-									(cur == '*' ||
-									cur == '/' ||
-									cur == '%')) {
-								outputStack.push((char)cur);
-								operatorStack.pop();
-							}
-							operatorStack.push((char)ch);
-							break;
-
-						case ')':
-							while (!operatorStack.empty() &&
-									cur != '(') {
-								outputStack.push((char)cur);
-								operatorStack.pop();
-							}
-							operatorStack.pop();
-							break;
-
-						}
-
-					}
-
-					nextChar();
-				}
-
-				return calcReversePolishNotation(exprRPN);
-			}
-
-			double calcReversePolishNotation(String expr) {
-				double result = Double.parseDouble(expr);
-				result++;
-
-				return result;
-			}
-
-			boolean eat(int charToEat) {
-				while (ch == ' ')
-					nextChar();
-				if (ch == charToEat) {
-					nextChar();
-					return true;
-				}
-				return false;
-			}
-
-			// Grammar:
-			// expression = term | expression `+` term | expression `-` term
-			// term = factor | term `*` factor | term `/` factor
-			// factor = `+` factor | `-` factor | `(` expression `)`
-			//        | number | functionName factor | factor `^` factor
-
-			double parseExpression()
-			{
-				double x = parseTerm();
-				for (;;) {
-					// addition
-					if (eat('+')) {
-						x += parseTerm();
-					// subtraction
-					} else if (eat('-')) {
-						x -= parseTerm();
-					} else {
-						break;
-					}
-				}
-				return x;
-			}
-
-			double parseTerm()
-			{
-				double x = parseFactor();
-				for (;;) {
-					// multiplication
-					if (eat('*')) {
-						x *= parseFactor();
-						// division
-					} else if (eat('/')) {
-						x /= parseFactor();
-						// modulus
-					} else if (eat('%')) {
-						x %= parseFactor();
-					} else {
-						break;
-					}
-				}
-				return x;
-			}
-
-			double parseFactor()
-			{
-				// unary plus
-				if (eat('+'))
-					return parseFactor();
-				if (eat('-'))
-					return -parseFactor();
-
-				double x;
-				int startPos = this.pos;
-				// parentheses
-				if (eat('(')) {
-					x = parseExpression();
-					eat(')');
-					// numbers
-				} else if ((ch >= '0' && ch <= '9') || ch == '.') {
-					while ((ch >= '0' && ch <= '9') || ch == '.') {
 						nextChar();
+						continue;
+
+					// no operators on the stack
+					} else if (operatorStack.empty()) {
+						operatorStack.push((char)ch);
+						nextChar();
+						continue;
 					}
-					x = Double.parseDouble(str.substring(startPos, this.pos));
-					// functions
-				} else if (ch >= 'a' && ch <= 'z') {
-					while (ch >= 'a' && ch <= 'z') nextChar();
-					String func = str.substring(startPos, this.pos);
-					x = parseFactor();
-					if (func.equals("sqrt")) {
-						x = Math.sqrt(x);
-					} else if (func.equals("sin")) {
-						x = Math.sin(Math.toRadians(x));
-					} else if (func.equals("cos")) {
-						x = Math.cos(Math.toRadians(x));
-					} else if (func.equals("tan")) {
-						x = Math.tan(Math.toRadians(x));
-					} else {
-						throw new RuntimeException("Unknown function: " + func);
+
+					// otherwise there is a operator to be parsed
+					int cur = operatorStack.peek();
+					switch (ch) {
+					// open grouping
+					case '(':
+						operatorStack.push((char)ch);
+						break;
+
+					// addition ops
+					case '+': /* fallthrough */
+					case '-':
+						while (!operatorStack.empty()
+								&& (cur == '+'
+								|| cur == '-'
+								|| cur == '*'
+								|| cur == '/'
+								|| cur == '%')) {
+							outputStack.push(operatorStack.pop());
+							cur = operatorStack.peek();
+						}
+						operatorStack.push((char)ch);
+						break;
+
+					// multiplication ops
+					case '*': /* fallthrough */
+					case '/': /* fallthrough */
+					case '%':
+						while (!operatorStack.empty()
+								&& (cur == '*'
+								|| cur == '/'
+								|| cur == '%')) {
+							outputStack.push(operatorStack.pop());
+							cur = operatorStack.peek();
+						}
+						operatorStack.push((char)ch);
+						break;
+
+					// close grouping
+					case ')':
+						while (!operatorStack.empty()
+								&& cur != '(') {
+							outputStack.push(operatorStack.pop());
+							cur = operatorStack.peek();
+						}
+						operatorStack.pop();
+						break;
+
+					// error
+					default:
+						throw new RuntimeException("Unexpected: " + (char)ch);
 					}
-				} else {
-					throw new RuntimeException("Unexpected: " + (char)ch);
+					nextChar();
 				}
 
-				// exponentiation
-				if (eat('^')) {
-					x = Math.pow(x, parseFactor());
-				}
+				// pop operator stack onto output stack
+				while (!operatorStack.empty())
+					outputStack.push(operatorStack.pop());
+				// reverse order of final stack
+				while (!outputStack.empty())
+					finalStack.push(outputStack.pop());
+				// create an expression string from the final stack
+				while (!finalStack.empty())
+					exprRPN += finalStack.pop() + " ";
 
-				return x;
+				// return the generated postfix expression and the evaluated result
+				return new ArrayList<>() {{
+					add(exprRPN);
+					add(calculateRPN());
+				}};
 			}
 
+			/**
+			 * This method evaluates an
+			 * RPN expression
+			 *
+			 * @return the result
+			 */
+			String calculateRPN() {
+				double a, b;
+				ArrayStack<Double> evalStack = new ArrayStack<>();
+				pos = -1;
+				str = exprRPN;
+				nextChar();
+				while (ch != -1) {
+					// number
+					if (ch >= '0' && ch <= '9') {
+						// int startPos = pos;
+						// while ((ch >= '0' && ch <= '9'))
+						//	nextChar();
+						// evalStack.push(Double.parseDouble(str.substring(startPos, pos)));
+						evalStack.push(Double.parseDouble(str.substring(pos, pos + 1)));
+						nextChar();
+						continue;
+
+					// skip spaces
+					} else if (ch == ' ') {
+						nextChar();
+						continue;
+					}
+
+					// otherwise there is a operator to be parsed
+					switch (ch) {
+						// a + b
+						case '+':
+							b = evalStack.pop();
+							a = evalStack.pop();
+							evalStack.push(a + b);
+							break;
+
+						// a - b
+						case '-':
+							b = evalStack.pop();
+							a = evalStack.pop();
+							evalStack.push(a - b);
+							break;
+
+						// a * b
+						case '*':
+							b = evalStack.pop();
+							a = evalStack.pop();
+							evalStack.push(a * b);
+							break;
+
+						// a / b
+						case '/':
+							b = evalStack.pop();
+							a = evalStack.pop();
+							evalStack.push(a / b);
+							break;
+
+						// a % b
+						case '%':
+							b = evalStack.pop();
+							a = evalStack.pop();
+							evalStack.push(a % b);
+							break;
+
+						// error
+						default:
+							throw new RuntimeException("Unexpected: " + (char)ch);
+					}
+					nextChar();
+				}
+				return Double.toString(evalStack.pop());
+			}
 		}.parse();
 	}
 
@@ -344,38 +343,50 @@ public class PabalinasJoey13 {
 
 			double parseFactor()
 			{
-				// unary plus
+				double x;
+				int startPos = pos;
+
+				// unary plus/minus
 				if (eat('+'))
 					return parseFactor();
 				if (eat('-'))
 					return -parseFactor();
 
-				double x;
-				int startPos = this.pos;
 				// parentheses
 				if (eat('(')) {
 					x = parseExpression();
 					eat(')');
-					// numbers
+
+				// numbers
 				} else if ((ch >= '0' && ch <= '9') || ch == '.') {
 					while ((ch >= '0' && ch <= '9') || ch == '.') {
 						nextChar();
 					}
-					x = Double.parseDouble(str.substring(startPos, this.pos));
-					// functions
+					x = Double.parseDouble(str.substring(startPos, pos));
+
+				// functions
 				} else if (ch >= 'a' && ch <= 'z') {
 					while (ch >= 'a' && ch <= 'z') nextChar();
-					String func = str.substring(startPos, this.pos);
+					String func = str.substring(startPos, pos);
 					x = parseFactor();
-					if (func.equals("sqrt")) {
+					switch (func) {
+					case "sqrt":
 						x = Math.sqrt(x);
-					} else if (func.equals("sin")) {
+						break;
+
+					case "sin":
 						x = Math.sin(Math.toRadians(x));
-					} else if (func.equals("cos")) {
+						break;
+
+					case "cos":
 						x = Math.cos(Math.toRadians(x));
-					} else if (func.equals("tan")) {
+						break;
+
+					case "tan":
 						x = Math.tan(Math.toRadians(x));
-					} else {
+						break;
+
+					default:
 						throw new RuntimeException("Unknown function: " + func);
 					}
 				} else {
@@ -426,7 +437,6 @@ public class PabalinasJoey13 {
 				ret[i] = lines.get(i);
 			return ret;
 		}
-
 		return null;
 	}
 }
