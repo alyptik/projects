@@ -15,9 +15,10 @@
       <file leaf-file-name="PabalinasJoey13.java" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/PabalinasJoey13.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="270">
-              <caret line="9" column="13" lean-forward="false" selection-start-line="9" selection-start-column="13" selection-end-line="9" selection-end-column="13" />
+            <state relative-caret-position="0">
+              <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
               <folding>
+                <element signature="n#!!doc" expanded="true" />
                 <element signature="imports" expanded="true" />
                 <element signature="e#2218#2219#0" expanded="true" />
                 <element signature="e#2279#2280#0" expanded="true" />
@@ -268,12 +269,12 @@
       <option name="presentableId" value="Default" />
       <updated>1507794009841</updated>
       <workItem from="1507794011823" duration="7388000" />
-      <workItem from="1507852011113" duration="12497000" />
+      <workItem from="1507852011113" duration="13076000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="19885000" />
+    <option name="totallyTimeSpent" value="20464000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-3" y="52" width="2166" height="1347" extended-state="0" />
@@ -326,6 +327,7 @@
         <state relative-caret-position="0">
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
+            <element signature="n#!!doc" expanded="true" />
             <element signature="imports" expanded="true" />
             <element signature="e#2218#2219#0" expanded="true" />
             <element signature="e#2279#2280#0" expanded="true" />
@@ -383,9 +385,10 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/PabalinasJoey13.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="270">
-          <caret line="9" column="13" lean-forward="false" selection-start-line="9" selection-start-column="13" selection-end-line="9" selection-end-column="13" />
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
+            <element signature="n#!!doc" expanded="true" />
             <element signature="imports" expanded="true" />
             <element signature="e#2218#2219#0" expanded="true" />
             <element signature="e#2279#2280#0" expanded="true" />

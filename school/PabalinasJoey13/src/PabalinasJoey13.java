@@ -332,10 +332,10 @@ public class PabalinasJoey13 {
 						|| eat('X')
 						|| eat('*')) {
 						x *= parseFactor();
-						// division
+					// division
 					} else if (eat('/')) {
 						x /= parseFactor();
-						// modulus
+					// modulus
 					} else if (eat('%')) {
 						x %= parseFactor();
 					} else {
