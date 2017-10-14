@@ -14,6 +14,7 @@ generic
 !/school/
 !/templates/
 !/arduino/
+/arduino/Arduino-Makefile/
 /arduino/elegoo/
 foo
 print_msg

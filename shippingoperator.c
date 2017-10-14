@@ -1,6 +1,6 @@
 #include <stdio.h>
 
-int main()
+int main(void)
 {
 	int i = 100;
 	// while i slides down to 0
@@ -11,7 +11,7 @@ int main()
 	     \__________/
 		       \
 			> 0 ) {
-		printf("test");
+		printf("test ");
 	}
 
 	return 0;
