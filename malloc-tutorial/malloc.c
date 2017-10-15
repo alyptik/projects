@@ -4,6 +4,9 @@
 #include <unistd.h>
 // Don't include stdlb since the names will conflict?
 
+/* silence linter */
+void *sbrk(__intptr_t __delta);
+
 // TODO: align
 
 // sbrk some extra space every time we need it.
@@ -11,12 +14,11 @@
 void *nofree_malloc(size_t size) {
   void *p = sbrk(0);
   void *request = sbrk(size);
-  if (request == (void*) -1) { 
+  if (request == (void*) -1) {
     return NULL; // sbrk failed
-  } else {
-    assert(p == request); // Not thread safe.
-    return p;
   }
+  assert(p == request); // Not thread safe.
+  return p;
 }
 
 struct block_meta {
@@ -49,7 +51,7 @@ struct block_meta *request_space(struct block_meta* last, size_t size) {
   if (request == (void*) -1) {
     return NULL; // sbrk failed.
   }
-  
+
   if (last) { // NULL on first request.
     last->next = block;
   }
@@ -91,7 +93,7 @@ void *malloc(size_t size) {
       block->magic = 0x77777777;
     }
   }
-  
+
   return(block+1);
 }
 
@@ -117,11 +119,11 @@ void free(void *ptr) {
   assert(block_ptr->free == 0);
   assert(block_ptr->magic == 0x77777777 || block_ptr->magic == 0x12345678);
   block_ptr->free = 1;
-  block_ptr->magic = 0x55555555;  
+  block_ptr->magic = 0x55555555;
 }
 
 void *realloc(void *ptr, size_t size) {
-  if (!ptr) { 
+  if (!ptr) {
     // NULL ptr. realloc should act like malloc.
     return malloc(size);
   }
@@ -140,6 +142,6 @@ void *realloc(void *ptr, size_t size) {
     return NULL; // TODO: set errno on failure.
   }
   memcpy(new_ptr, ptr, block_ptr->size);
-  free(ptr);  
+  free(ptr);
   return new_ptr;
 }
