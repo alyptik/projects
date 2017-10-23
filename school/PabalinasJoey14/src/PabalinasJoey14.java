@@ -28,7 +28,7 @@ public class PabalinasJoey14 {
 	public static void main(String[] args)
 	{
 		// declare variables to hold arguments
-		String[] exprList;
+		LinkedList<String> exprList;
 
 		// sanity check
 		if (args.length < 1) {
@@ -43,19 +43,19 @@ public class PabalinasJoey14 {
 				throw new NullPointerException();
 
 			// parse and evaluate each line as one expression
-			for (String expr : exprList) {
+			for (int i = 1; i <= exprList.getSize(); i++) {
 				// evaluate lines
-				ArrayList<String> result = eval(expr);
-				result.add(evalInfix(expr) + "\n");
+				LinkedList<String> result = eval(exprList.get(i));
+				result.add(evalInfix(exprList.get(i)) + "\n");
 				// print results
 				System.out.println("Infix expression = "
-					+ expr);
+					+ exprList.get(i));
 				System.out.println("Postfix expression = "
-					+ result.get(0));
-				System.out.println("Evaluation result (postfix) = "
 					+ result.get(1));
-				System.out.println("Evaluation result (infix) = "
+				System.out.println("Evaluation result (postfix) = "
 					+ result.get(2));
+				System.out.println("Evaluation result (infix) = "
+					+ result.get(3));
 			}
 
 		// catch exceptions
@@ -73,7 +73,7 @@ public class PabalinasJoey14 {
 	 * @param inputStr the expression
 	 * @return the result
 	 */
-	private static ArrayList<String> eval(final String inputStr) throws EmptyStackException
+	private static LinkedList<String> eval(final String inputStr) throws EmptyStackException
 	{
 		return new Object() {
 			int pos = -1, ch;
@@ -96,7 +96,7 @@ public class PabalinasJoey14 {
 			 *
 			 * @return the result
 			 */
-			ArrayList<String> parse()
+			LinkedList<String> parse()
 			{
 				str = inputStr;
 				nextChar();
@@ -185,7 +185,7 @@ public class PabalinasJoey14 {
 					exprRPN += finalStack.pop() + " ";
 
 				// return the generated postfix expression and the evaluated result
-				return new ArrayList<>() {{
+				return new LinkedList<String>() {{
 					add(exprRPN);
 					add(calculateRPN());
 				}};
@@ -409,15 +409,15 @@ public class PabalinasJoey14 {
 
 	/**
 	 * The "readFile" method reads data from a file and
-	 * returns an array of Strings
+	 * returns an list of Strings
 	 * @param inputFile the file to read
 	 * @return the array
 	 */
-	private static String[] readFile(String inputFile) {
+	private static LinkedList<String> readFile(String inputFile) {
 		// connect to file (does NOT create new file)
 		File file = new File(inputFile);
 		Scanner scanFile = null;
-		ArrayList<String> lines = new ArrayList<>();
+		LinkedList<String> lines = new LinkedList<>();
 
 		try {
 			scanFile = new Scanner(file);
@@ -436,10 +436,7 @@ public class PabalinasJoey14 {
 				lines.add(scanFile.nextLine());
 			}
 
-			String[] ret = new String[lines.size()];
-			for (int i = 0; i < lines.size(); i++)
-				ret[i] = lines.get(i);
-			return ret;
+			return lines;
 		}
 		return null;
 	}
