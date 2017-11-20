@@ -1,0 +1,27 @@
+diff --git a/templates/prepare-commit-msg b/templates/prepare-commit-msg
+new file mode 100755
+index 0000000..51ea980
+--- /dev/null
++++ b/templates/prepare-commit-msg
+@@ -0,0 +1,21 @@
++#!/bin/bash
++
++old_commit_msg="$(cat "${1}")"
++echo -n "" > "${1}"
++
++# added
++for path in $(git diff --name-only --cached --diff-filter=A); do
++	echo "${path##*/}:" >> "${1}"
++done
++
++# modified
++for path in $(git diff --name-only --cached --diff-filter=M); do
++	echo "${path##*/}:" >> "${1}"
++done
++
++# deleted
++for path in $(git diff --name-only --cached --diff-filter=D); do
++	echo "${path##*/}:" >> "${1}"
++done
++
++echo "${old_commit_msg}" >> "${1}"
