@@ -10,7 +10,7 @@ index 6f0effa..edba714 100755
 -	if [[ "${path}" =~ .*/PKGBUILD$ && -f "${path}" ]]; then
 -		git add ${path%PKGBUILD}.SRCINFO
 +	if [[ "${path}" =~ ^(.*/|)PKGBUILD$ && -f "${path}" ]]; then
-+		[[ -z "${path%PKGBUILD}" ]] && tmp='.' || tmp="${path%PKGBUILD}"
++		[[ -z "${path%PKGBUILD}" ]] && tmp='./' || tmp="${path%PKGBUILD}"
 +		git add "${tmp}.SRCINFO"
  	fi
  done
@@ -27,7 +27,7 @@ index ba75d78..d0be24a 100755
 -		echo -e "\033[1;32m==>\033[0m\033[1m Generating and adding .SRCINFO for ${path%/PKGBUILD}\033[0m"
 -		pushd ${path%PKGBUILD} >/dev/null
 +	if [[ "${path}" =~ ^(.*/|)PKGBUILD$ && -f "${path}" ]]; then
-+		[[ -z "${path%PKGBUILD}" ]] && tmp='.' || tmp="${path%PKGBUILD}"
++		[[ -z "${path%PKGBUILD}" ]] && tmp='./' || tmp="${path%PKGBUILD}"
 +		printf "\033[1;32m%s\033[0m\033[1m%s\033[0m" "==>" " Generating and adding .SRCINFO for $tmp"
 +		pushd "$tmp" >/dev/null
  		makepkg --printsrcinfo > .SRCINFO
@@ -70,7 +70,7 @@ index bffbc3d..28ad6f7 100755
 -	if [[ "${path}" =~ .*/PKGBUILD$ ]]; then
 -		echo "rmpkg: ${path%/PKGBUILD}" >> "${1}"
 +	if [[ "${path}" =~ ^(.*/|)PKGBUILD$ ]]; then
-+		[[ -z "${path%PKGBUILD}" ]] && tmp='.' || tmp="${path%PKGBUILD}"
++		[[ -z "${path%PKGBUILD}" ]] && tmp='./' || tmp="${path%PKGBUILD}"
 +		echo "rmpkg: ${tmp}" >> "${1}"
  	fi
  done

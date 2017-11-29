@@ -46,12 +46,12 @@ int main(int argc, char **argv) {
 	char  *hash, *hash2;
 	unsigned int fl1 = ~0, fl2 = ~(unsigned int)0, fl3 = -1;
 	printf("0x%X - 0x%X - 0x%X\n\n", fl1, fl2, fl3);
-	//struct crypt_data *data;
-	struct crypt_data *data = malloc(sizeof *data);
-	//data.initialized = -1;
+	struct crypt_data data;
+	/* struct crypt_data *data = malloc(sizeof *data); */
+	data.initialized = -1;
 
 	hash = crypt(key, salt);
-	hash2 = crypt_r(key, salt, data);
+	hash2 = crypt_r(key, salt, &data);
 	printf("%s - %s\n", hash, hash2);
 
 	char hello[20] = "hello";
