@@ -1,0 +1,55 @@
+current node = 1000,689.3,Martha Dandridge Custis Washington
+type         = leaf
+left child   = null
+right child  = null
+
+current node = 2000,267.96,Louisa Catherine Johnson Adams
+type         = leaf
+left child   = null
+right child  = null
+
+current node = 3000,-600.47,Letitia Christian Tyler
+type         = internal
+left child   = 2900,-451.92,William Henry Harrison
+right child  = 3100,672.54,Priscilla Cooper Tyler
+
+current node = 3333,777.77,William Jefferson Clinton
+type         = leaf
+left child   = null
+right child  = null
+
+current node = 4000,860.22,Jane Means Appleton Pierce
+type         = internal
+left child   = 3800,-836.03,Lucy Ware Webb Hayes
+right child  = null
+
+current node = 5000,918.15,Abigail Powers Fillmore
+type         = root
+left child   = 1200,-181.29,Abigail Smith Adams
+right child  = 8200,-367.36,Abraham Lincoln
+
+current node = 6000,-208.54,Caroline Lavinia Scott Harrison
+type         = internal
+left child   = 5500,986.35,Chester A. Arthur
+right child  = null
+
+current node = 7000,-352.06,Helen Herron Taft
+type         = internal
+left child   = 6900,503.41,Theodore Roosevelt
+right child  = 7100,-756.8,William Howard Taft
+
+current node = 7777,555.55,Hillary Rodham Clinton
+type         = internal
+left child   = 7700,-388.95,Warren G. Harding
+right child  = null
+
+current node = 8000,-44.79,Lou Henry Hoover
+type         = leaf
+left child   = null
+right child  = null
+
+current node = 9000,-823.74,Claudia Taylor Johnson
+type         = internal
+left child   = 8700,973.53,Dwight D. Eisenhower
+right child  = 9100,-759.52,Lyndon B. Johnson
+
