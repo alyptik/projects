@@ -10,7 +10,6 @@ extern int optind, opterr, optopt;
 int main(int argc, char *argv[])
 {
 	int opt;
-	/* char const optstring[] = "hptvwc:a:e:i:l:I:o:"; */
 	char const *optstring = argv[1];
 
 	/* print out cmdline original */
@@ -30,7 +29,7 @@ int main(int argc, char *argv[])
 		printf(" %s", argv[idx]);
 	puts("\"");
 
-	/* print an error if option not found */
+	/* don't print an error if option not found */
 	opterr = 0;
 	/* reset option indices to reuse argv */
 	optind = 1;
@@ -50,10 +49,11 @@ int main(int argc, char *argv[])
 				/* handle weird cases like `-vvvvvvv` */
 				if (argv[this_optind][0] != '-')
 					break;
+				/* check if actually an argument index */
 				if (strpbrk(optstring, optchar)[1] == ':' && !strcmp(optarg, argv[optind - 1]))
-						this_optind--;
+					this_optind--;
 				printf("argv[%zu] = \"%s\", this_optind = \"%zu\", optind = \"%d\", optarg = \"%s\"\n",
-						this_optind, argv[this_optind], this_optind, optind, optarg);
+					this_optind, argv[this_optind], this_optind, optind, optarg);
 				break;
 			}
 		}
