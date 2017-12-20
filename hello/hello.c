@@ -31,6 +31,7 @@ double expon(double n, double e)
 //char *crypt_r(const char*, const char*, struct crypt_data);
 
 int main(int argc, char **argv) {
+	malloc(1);
 
 	uint64_t d, ulm = ULONG_MAX;
 	scanf("%lu", &d);
