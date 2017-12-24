@@ -6,7 +6,7 @@
 
 # Note: Uses Intel syntax with destination operand first. Remember to
 # put syntax directives in the beginning and end of inline assembly:
-.intel_syntax noprefix 
+.intel_syntax noprefix
 
 .global _end
 .global _edata
@@ -52,4 +52,4 @@ foo:                                                    # byte
 
 
 # Return to AT&T syntax with destination operand last:
-.att_syntax prefix 
+.att_syntax prefix
