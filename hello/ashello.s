@@ -5,11 +5,11 @@
         .global _strlen_next
         .global _strlen_null
 
-        _start: 
+        _start:
                 movl    $msg, %edi
                 call    _strlen
 
-                movl    %eax,%edx # third argument: message length.
+                movl    %eax, %edx # third argument: message length.
                 movl    $msg, %ecx # second argument: pointer to message to write.
                 movl    $1,%ebx # first argument: file handle (stdout).
                 movl    $4,%eax # system call number (sys_write).
@@ -22,11 +22,11 @@
                 #sysenter
                 int     $0x80     # call kernel.
 
-        _strlen: 
-                pushl   %ecx                    # save and clear out counter
+        _strlen:
+                push	%ecx                    # save and clear out counter
                 xorl    %ecx,%ecx
 
-        _strlen_next: 
+        _strlen_next:
 
                 cmpb    $0,(%edi)      # null byte yet?
                 jz      _strlen_null    # yes, get out
@@ -35,7 +35,7 @@
                 incl    %edi                    # move to next char
                 jmp     _strlen_next    # process again
 
-        _strlen_null: 
+        _strlen_null:
 
                 movl    %ecx,%eax               # ecx = the length (put in eax)
                 popl    %ecx                    # restore ecx
@@ -45,6 +45,4 @@
         msg:    .asciz  "Hello, world!\n"
         # len:  equ     $ - msg
         # times 510-($-$$)      db      0
-
-# vim: filetype=nasm
 
