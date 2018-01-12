@@ -9,36 +9,35 @@ all:
 
 # user configuration
 MKCFG := config.mk
-# if previously built with `-fsanitize=address` we have to use `DEBUG` flags
-OPT != test -f debug.mk
-ifeq ($(.SHELLSTATUS), 0)
-	OLVL = $(DEBUG)
+# if previously built with `-fsanitize=address` we have to use `ASAN` flags
+OPT != test -f asan.mk
+ifeq ($(.SHELLSTATUS),0)
+	OLVL = $(DEBUG) $(ASAN)
 endif
 -include $(DEP) $(MKCFG)
-.PHONY: all check clean debug dist install test uninstall $(MKALL)
+.PHONY: all asan check clean debug dist install test uninstall $(MKALL)
 
-debug:
-	# debug indicator flag
-	@touch debug.mk
-	@rm -f $(TARGET)
+asan:
+	# asan indicator flag
+	@touch asan.mk
+	$(MAKE) clean
 	$(MAKE) $(TARGET) check
+debug:
+	$(MAKE) clean
+	$(MAKE) $(TARGET) check OLVL="$(DEBUG)"
 
 $(TARGET): %: $(OBJ)
-	$(LD) $(LDFLAGS) $(OLVL) $(LIBS) $^ -o $@
+	$(LD) $(LDFLAGS) $(LIBS) $^ -o $@
 $(TEST): %: %.o $(TAP).o $(OBJ)
-	$(LD) $(LDFLAGS) $(OLVL) $(LIBS) $(TAP).o $(<:t/test%=src/%) $< -o $@
+	$(LD) $(LDFLAGS) $(LIBS) $(TAP).o $(<:t/test%=src/%) $< -o $@
 %.d %.o: %.c
 	$(CC) $(CFLAGS) $(OLVL) $(CPPFLAGS) -c $< -o $@
 
 test check: $(TOBJ) $(TEST)
-	./t/testcompile
-	./t/testhist
-	./t/testparseopts
-	echo "test string" | ./t/testreadline
-	./t/testvars
+	./t/testplaceholder
 clean:
 	@echo "cleaning"
-	@rm -fv $(DEP) $(TARGET) $(TEST) $(OBJ) $(TOBJ) $(TARGET).tar.gz debug.mk
+	@rm -fv $(DEP) $(TARGET) $(TEST) $(OBJ) $(TOBJ) $(TARGET).tar.gz asan.mk
 install: $(TARGET)
 	@echo "installing"
 	@mkdir -pv $(DESTDIR)$(PREFIX)/$(BINDIR)

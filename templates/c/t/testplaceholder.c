@@ -23,11 +23,15 @@
 
 #define _BSD_SOURCE
 #define _DEFAULT_SOURCE
-#define _GNU_SOURCE
 #define _POSIX_C_SOURCE 200809L
 #define _SVID_SOURCE
 #define _XOPEN_SOURCE 700
 
+#ifndef _GNU_SOURCE
+	#define _GNU_SOURCE
+#endif
+
+#include "tap.h"
 #include <assert.h>
 #include <ctype.h>
 #include <err.h>
@@ -64,8 +68,10 @@
 
 extern char **environ;
 
-int main(int argc UNUSED, char *argv[] UNUSED)
+int main(int argc, char **argv)
 {
+	(void)argc, (void)argv;
+
 	plan(1);
 
 	ok(1 == 1, "<template>");
