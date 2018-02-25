@@ -59,26 +59,102 @@
 	.text
 .Ltext0:
 	.p2align 4,,15
+	.globl	div_fast
+	.type	div_fast, @function
+div_fast:
+.LFB15:
+	.file 1 "signed_vs_unsigned.c"
+	.loc 1 44 0
+	.cfi_startproc
+.LVL0:
+# signed_vs_unsigned.c:46:     for (i = 1; num / i; i++);
+	.loc 1 46 0
+	testl	%edi, %edi	# num
+	movl	$1, %ecx	#, <retval>
+	je	.L1	#,
+.LVL1:
+	.p2align 4,,10
+	.p2align 3
+.L3:
+# signed_vs_unsigned.c:46:     for (i = 1; num / i; i++);
+	.loc 1 46 0 is_stmt 0 discriminator 3
+	movl	%edi, %eax	# num, tmp92
+	addl	$1, %ecx	#, <retval>
+.LVL2:
+	cltd
+	idivl	%ecx	# <retval>
+	testl	%eax, %eax	# tmp92
+	jne	.L3	#,
+.LVL3:
+.L1:
+# signed_vs_unsigned.c:48: }
+	.loc 1 48 0 is_stmt 1
+	movl	%ecx, %eax	# <retval>,
+	ret
+	.cfi_endproc
+.LFE15:
+	.size	div_fast, .-div_fast
+	.p2align 4,,15
+	.globl	unsigned_div_fast
+	.type	unsigned_div_fast, @function
+unsigned_div_fast:
+.LFB16:
+	.loc 1 50 0
+	.cfi_startproc
+.LVL4:
+# signed_vs_unsigned.c:52:     for (i = 1; num / i; i++);
+	.loc 1 52 0
+	testl	%edi, %edi	# num
+	je	.L10	#,
+	movl	$1, %ecx	#, i
+.LVL5:
+	.p2align 4,,10
+	.p2align 3
+.L9:
+# signed_vs_unsigned.c:52:     for (i = 1; num / i; i++);
+	.loc 1 52 0 is_stmt 0 discriminator 3
+	addl	$1, %ecx	#, i
+.LVL6:
+	xorl	%edx, %edx	# tmp94
+	movl	%edi, %eax	# num, tmp93
+	divl	%ecx	# i
+	testl	%eax, %eax	# tmp93
+	jne	.L9	#,
+	movl	%ecx, %eax	# i, <retval>
+	ret
+.LVL7:
+	.p2align 4,,10
+	.p2align 3
+.L10:
+# signed_vs_unsigned.c:52:     for (i = 1; num / i; i++);
+	.loc 1 52 0
+	movl	$1, %eax	#, <retval>
+# signed_vs_unsigned.c:54: }
+	.loc 1 54 0 is_stmt 1
+	ret
+	.cfi_endproc
+.LFE16:
+	.size	unsigned_div_fast, .-unsigned_div_fast
+	.p2align 4,,15
 	.globl	isprime_slow
 	.type	isprime_slow, @function
 isprime_slow:
 .LFB11:
-	.file 1 "signed_vs_unsigned.c"
 	.loc 1 4 0
 	.cfi_startproc
-.LVL0:
+.LVL8:
 # signed_vs_unsigned.c:5:     if (num % 2 == 0)
 	.loc 1 5 0
 	testb	$1, %dil	#, num
-	je	.L2	#,
-.LVL1:
+	je	.L13	#,
+.LVL9:
 .LBB9:
 .LBB10:
 .LBB11:
 # signed_vs_unsigned.c:7:     for (int i = 3; i < num; i += 2) {
 	.loc 1 7 0
 	cmpl	$3, %edi	#, num
-	jle	.L6	#,
+	jle	.L17	#,
 # signed_vs_unsigned.c:8:         if (num % i == 0)
 	.loc 1 8 0
 	movl	%edi, %eax	# num, tmp115
@@ -90,40 +166,40 @@ isprime_slow:
 	leal	(%rdx,%rdx,2), %eax	#, tmp107
 	movl	%edi, %edx	# num, <retval>
 	subl	%eax, %edx	# tmp107, <retval>
-	je	.L1	#,
+	je	.L12	#,
 	leal	-4(%rdi), %esi	#, tmp108
 # signed_vs_unsigned.c:7:     for (int i = 3; i < num; i += 2) {
 	.loc 1 7 0
 	movl	$3, %ecx	#, i
 	andl	$-2, %esi	#, tmp109
 	addl	$5, %esi	#, _16
-	jmp	.L4	#
-.LVL2:
+	jmp	.L15	#
+.LVL10:
 	.p2align 4,,10
 	.p2align 3
-.L5:
+.L16:
 # signed_vs_unsigned.c:8:         if (num % i == 0)
 	.loc 1 8 0
 	movl	%edi, %eax	# num, tmp111
 	cltd
 	idivl	%ecx	# i
 	testl	%edx, %edx	# <retval>
-	je	.L1	#,
-.LVL3:
-.L4:
+	je	.L12	#,
+.LVL11:
+.L15:
 # signed_vs_unsigned.c:7:     for (int i = 3; i < num; i += 2) {
 	.loc 1 7 0
 	addl	$2, %ecx	#, i
-.LVL4:
+.LVL12:
 	cmpl	%esi, %ecx	# _16, i
-	jne	.L5	#,
-.LVL5:
-.L6:
+	jne	.L16	#,
+.LVL13:
+.L17:
 .LBE11:
 # signed_vs_unsigned.c:11:     return 1;
 	.loc 1 11 0
 	movl	$1, %edx	#, <retval>
-.L1:
+.L12:
 .LBE10:
 .LBE9:
 # signed_vs_unsigned.c:12: }
@@ -132,7 +208,7 @@ isprime_slow:
 	ret
 	.p2align 4,,10
 	.p2align 3
-.L2:
+.L13:
 # signed_vs_unsigned.c:6:         return num == 2;
 	.loc 1 6 0
 	xorl	%edx, %edx	# <retval>
@@ -152,19 +228,19 @@ unsigned_isprime_slow:
 .LFB12:
 	.loc 1 14 0
 	.cfi_startproc
-.LVL6:
+.LVL14:
 # signed_vs_unsigned.c:15:     if (num % 2 == 0)
 	.loc 1 15 0
 	testb	$1, %dil	#, num
-	je	.L15	#,
-.LVL7:
+	je	.L25	#,
+.LVL15:
 .LBB15:
 .LBB16:
 .LBB17:
 # signed_vs_unsigned.c:17:     for (unsigned int i = 3; i < num; i += 2) {
 	.loc 1 17 0
 	cmpl	$3, %edi	#, num
-	jbe	.L19	#,
+	jbe	.L29	#,
 # signed_vs_unsigned.c:18:         if (num % i == 0)
 	.loc 1 18 0
 	movl	%edi, %eax	# num, tmp117
@@ -173,35 +249,35 @@ unsigned_isprime_slow:
 	shrl	%edx	# tmp102
 	leal	(%rdx,%rdx,2), %eax	#, tmp107
 	cmpl	%eax, %edi	# tmp107, num
-	je	.L21	#,
+	je	.L31	#,
 	leal	-4(%rdi), %esi	#, tmp109
 # signed_vs_unsigned.c:17:     for (unsigned int i = 3; i < num; i += 2) {
 	.loc 1 17 0
 	movl	$3, %ecx	#, i
 	andl	$-2, %esi	#, tmp110
 	addl	$5, %esi	#, _13
-	jmp	.L17	#
-.LVL8:
+	jmp	.L27	#
+.LVL16:
 	.p2align 4,,10
 	.p2align 3
-.L18:
+.L28:
 # signed_vs_unsigned.c:18:         if (num % i == 0)
 	.loc 1 18 0
 	xorl	%edx, %edx	# tmp112
 	movl	%edi, %eax	# num, tmp113
 	divl	%ecx	# i
 	testl	%edx, %edx	# tmp112
-	je	.L21	#,
-.LVL9:
-.L17:
+	je	.L31	#,
+.LVL17:
+.L27:
 # signed_vs_unsigned.c:17:     for (unsigned int i = 3; i < num; i += 2) {
 	.loc 1 17 0
 	addl	$2, %ecx	#, i
-.LVL10:
+.LVL18:
 	cmpl	%esi, %ecx	# _13, i
-	jne	.L18	#,
-.LVL11:
-.L19:
+	jne	.L28	#,
+.LVL19:
+.L29:
 .LBE17:
 # signed_vs_unsigned.c:21:     return 1;
 	.loc 1 21 0
@@ -209,7 +285,7 @@ unsigned_isprime_slow:
 	ret
 	.p2align 4,,10
 	.p2align 3
-.L15:
+.L25:
 .LBE16:
 .LBE15:
 # signed_vs_unsigned.c:16:         return num == 2;
@@ -220,7 +296,7 @@ unsigned_isprime_slow:
 	ret
 	.p2align 4,,10
 	.p2align 3
-.L21:
+.L31:
 .LBB20:
 .LBB19:
 .LBB18:
@@ -243,19 +319,19 @@ isprime_fast:
 .LFB13:
 	.loc 1 24 0
 	.cfi_startproc
-.LVL12:
+.LVL20:
 # signed_vs_unsigned.c:25:     if (num % 2 == 0)
 	.loc 1 25 0
 	testb	$1, %dil	#, num
-	je	.L23	#,
-.LVL13:
+	je	.L33	#,
+.LVL21:
 .LBB24:
 .LBB25:
 .LBB26:
 # signed_vs_unsigned.c:27:     for (int i = 3; i * i <= num; i += 2) {
 	.loc 1 27 0
 	cmpl	$8, %edi	#, num
-	jle	.L27	#,
+	jle	.L37	#,
 # signed_vs_unsigned.c:28:         if (num % i == 0)
 	.loc 1 28 0
 	movl	%edi, %eax	# num, tmp109
@@ -267,39 +343,39 @@ isprime_fast:
 	leal	(%rdx,%rdx,2), %eax	#, tmp102
 	movl	%edi, %edx	# num, <retval>
 	subl	%eax, %edx	# tmp102, <retval>
-	je	.L22	#,
+	je	.L32	#,
 # signed_vs_unsigned.c:27:     for (int i = 3; i * i <= num; i += 2) {
 	.loc 1 27 0
 	movl	$3, %ecx	#, i
-	jmp	.L25	#
-.LVL14:
+	jmp	.L35	#
+.LVL22:
 	.p2align 4,,10
 	.p2align 3
-.L26:
+.L36:
 # signed_vs_unsigned.c:28:         if (num % i == 0)
 	.loc 1 28 0
 	movl	%edi, %eax	# num, tmp104
 	cltd
 	idivl	%ecx	# i
 	testl	%edx, %edx	# <retval>
-	je	.L22	#,
-.LVL15:
-.L25:
+	je	.L32	#,
+.LVL23:
+.L35:
 # signed_vs_unsigned.c:27:     for (int i = 3; i * i <= num; i += 2) {
 	.loc 1 27 0
 	addl	$2, %ecx	#, i
-.LVL16:
+.LVL24:
 	movl	%ecx, %eax	# i, tmp105
 	imull	%ecx, %eax	# i, tmp105
 	cmpl	%eax, %edi	# tmp105, num
-	jge	.L26	#,
-.LVL17:
-.L27:
+	jge	.L36	#,
+.LVL25:
+.L37:
 .LBE26:
 # signed_vs_unsigned.c:31:     return 1;
 	.loc 1 31 0
 	movl	$1, %edx	#, <retval>
-.L22:
+.L32:
 .LBE25:
 .LBE24:
 # signed_vs_unsigned.c:32: }
@@ -308,7 +384,7 @@ isprime_fast:
 	ret
 	.p2align 4,,10
 	.p2align 3
-.L23:
+.L33:
 # signed_vs_unsigned.c:26:         return num == 2;
 	.loc 1 26 0
 	xorl	%edx, %edx	# <retval>
@@ -328,19 +404,19 @@ unsigned_isprime_fast:
 .LFB14:
 	.loc 1 34 0
 	.cfi_startproc
-.LVL18:
+.LVL26:
 # signed_vs_unsigned.c:35:     if (num % 2 == 0)
 	.loc 1 35 0
 	testb	$1, %dil	#, num
-	je	.L35	#,
-.LVL19:
+	je	.L45	#,
+.LVL27:
 .LBB30:
 .LBB31:
 .LBB32:
 # signed_vs_unsigned.c:37:     for (unsigned int i = 3; i * i <= num; i += 2) {
 	.loc 1 37 0
 	cmpl	$8, %edi	#, num
-	jbe	.L39	#,
+	jbe	.L49	#,
 # signed_vs_unsigned.c:38:         if (num % i == 0)
 	.loc 1 38 0
 	movl	%edi, %eax	# num, tmp112
@@ -349,34 +425,34 @@ unsigned_isprime_fast:
 	shrl	%edx	# tmp98
 	leal	(%rdx,%rdx,2), %eax	#, tmp103
 	cmpl	%eax, %edi	# tmp103, num
-	je	.L41	#,
+	je	.L51	#,
 # signed_vs_unsigned.c:37:     for (unsigned int i = 3; i * i <= num; i += 2) {
 	.loc 1 37 0
 	movl	$3, %ecx	#, i
-	jmp	.L37	#
-.LVL20:
+	jmp	.L47	#
+.LVL28:
 	.p2align 4,,10
 	.p2align 3
-.L38:
+.L48:
 # signed_vs_unsigned.c:38:         if (num % i == 0)
 	.loc 1 38 0
 	xorl	%edx, %edx	# tmp106
 	movl	%edi, %eax	# num, tmp107
 	divl	%ecx	# i
 	testl	%edx, %edx	# tmp106
-	je	.L41	#,
-.LVL21:
-.L37:
+	je	.L51	#,
+.LVL29:
+.L47:
 # signed_vs_unsigned.c:37:     for (unsigned int i = 3; i * i <= num; i += 2) {
 	.loc 1 37 0
 	addl	$2, %ecx	#, i
-.LVL22:
+.LVL30:
 	movl	%ecx, %eax	# i, tmp108
 	imull	%ecx, %eax	# i, tmp108
 	cmpl	%eax, %edi	# tmp108, num
-	jnb	.L38	#,
-.LVL23:
-.L39:
+	jnb	.L48	#,
+.LVL31:
+.L49:
 .LBE32:
 # signed_vs_unsigned.c:41:     return 1;
 	.loc 1 41 0
@@ -384,7 +460,7 @@ unsigned_isprime_fast:
 	ret
 	.p2align 4,,10
 	.p2align 3
-.L35:
+.L45:
 .LBE31:
 .LBE30:
 # signed_vs_unsigned.c:36:         return num == 2;
@@ -395,7 +471,7 @@ unsigned_isprime_fast:
 	ret
 	.p2align 4,,10
 	.p2align 3
-.L41:
+.L51:
 .LBB35:
 .LBB34:
 .LBB33:
@@ -421,16 +497,22 @@ unsigned_isprime_fast:
 .LC3:
 	.string	"unsigned_isprime_fast"
 .LC4:
-	.string	"%s(%d) != %d\n"
+	.string	"div_fast"
 .LC5:
-	.string	"%21s: %4d.%03dms\n"
+	.string	"unsigned_div_fast"
+.LC6:
+	.string	"%s(%d) != %d\n"
+.LC7:
+	.string	"%21s: %4ld.%03ldms\n"
+.LC8:
+	.string	"%21s: %ld.%03ld\316\274s\n"
 	.section	.text.startup,"ax",@progbits
 	.p2align 4,,15
 	.globl	main
 	.type	main, @function
 main:
-.LFB15:
-	.loc 1 44 0
+.LFB17:
+	.loc 1 56 0
 	.cfi_startproc
 	pushq	%r15	#
 	.cfi_def_cfa_offset 16
@@ -450,173 +532,223 @@ main:
 	pushq	%rbx	#
 	.cfi_def_cfa_offset 56
 	.cfi_offset 3, -56
-	subq	$264, %rsp	#,
-	.cfi_def_cfa_offset 320
-# signed_vs_unsigned.c:44: int main(void) {
-	.loc 1 44 0
-	movq	%fs:40, %rax	#, tmp199
-	movq	%rax, 248(%rsp)	# tmp199, D.2606
-	xorl	%eax, %eax	# tmp199
-# signed_vs_unsigned.c:45:     int a[] = {
-	.loc 1 45 0
-	movabsq	$4589934537, %rax	#, tmp202
-	leaq	32(%rsp), %r13	#, ivtmp.45
-	movq	$294967291, 128(%rsp)	#, MEM[(int *)&a]
-	movq	%rax, 152(%rsp)	# tmp202, MEM[(int *)&a + 24B]
-	subq	$39948, %rax	#, tmp203
-	movq	$294367293, 136(%rsp)	#, MEM[(int *)&a + 8B]
-	movq	%rax, 192(%rsp)	# tmp203, MEM[(int *)&a + 64B]
-# signed_vs_unsigned.c:50:     struct testcase { int (*fun)(); const char *name; int t; } test[] = {
-	.loc 1 50 0
-	leaq	isprime_slow(%rip), %rax	#, tmp204
-# signed_vs_unsigned.c:45:     int a[] = {
-	.loc 1 45 0
-	movq	$294967293, 144(%rsp)	#, MEM[(int *)&a + 16B]
-	movq	$294967251, 160(%rsp)	#, MEM[(int *)&a + 32B]
-	movq	$294965291, 168(%rsp)	#, MEM[(int *)&a + 40B]
-# signed_vs_unsigned.c:50:     struct testcase { int (*fun)(); const char *name; int t; } test[] = {
-	.loc 1 50 0
-	movq	%r13, %rbx	# ivtmp.45, ivtmp.78
-	movq	%rax, 32(%rsp)	# tmp204, test[0].fun
-	leaq	.LC0(%rip), %rax	#, tmp205
-# signed_vs_unsigned.c:45:     int a[] = {
-	.loc 1 45 0
-	movq	$294966291, 176(%rsp)	#, MEM[(int *)&a + 48B]
-	movq	$294963293, 184(%rsp)	#, MEM[(int *)&a + 56B]
-	movq	$294961293, 200(%rsp)	#, MEM[(int *)&a + 72B]
-# signed_vs_unsigned.c:50:     struct testcase { int (*fun)(); const char *name; int t; } test[] = {
-	.loc 1 50 0
-	movq	%rax, 40(%rsp)	# tmp205, test[0].name
-	leaq	unsigned_isprime_slow(%rip), %rax	#, tmp206
-# signed_vs_unsigned.c:45:     int a[] = {
-	.loc 1 45 0
-	movq	$294917293, 208(%rsp)	#, MEM[(int *)&a + 80B]
-	movq	$294167293, 216(%rsp)	#, MEM[(int *)&a + 88B]
-	movq	$294267293, 224(%rsp)	#, MEM[(int *)&a + 96B]
-# signed_vs_unsigned.c:50:     struct testcase { int (*fun)(); const char *name; int t; } test[] = {
-	.loc 1 50 0
-	movq	%rax, 56(%rsp)	# tmp206, test[1].fun
-	leaq	.LC1(%rip), %rax	#, tmp207
-# signed_vs_unsigned.c:45:     int a[] = {
-	.loc 1 45 0
-	movq	$294367293, 232(%rsp)	#, MEM[(int *)&a + 104B]
-	movq	$294467293, 240(%rsp)	#, MEM[(int *)&a + 112B]
-# signed_vs_unsigned.c:50:     struct testcase { int (*fun)(); const char *name; int t; } test[] = {
-	.loc 1 50 0
-	movl	$0, 48(%rsp)	#, test[0].t
-	movq	%rax, 64(%rsp)	# tmp207, test[1].name
-	leaq	isprime_fast(%rip), %rax	#, tmp208
-	movl	$0, 72(%rsp)	#, test[1].t
-	movl	$0, 96(%rsp)	#, test[2].t
-	movq	%rax, 80(%rsp)	# tmp208, test[2].fun
-	leaq	.LC2(%rip), %rax	#, tmp209
-	movq	%rax, 88(%rsp)	# tmp209, test[2].name
-	leaq	unsigned_isprime_fast(%rip), %rax	#, tmp210
-	movq	%rax, 104(%rsp)	# tmp210, test[3].fun
-	leaq	.LC3(%rip), %rax	#, tmp211
-	movl	$0, 120(%rsp)	#, test[3].t
-.LVL24:
-	movq	%rax, 112(%rsp)	# tmp211, test[3].name
-	leaq	96(%r13), %rax	#, _108
-	movq	%rax, 16(%rsp)	# _108, %sfp
-	leaq	128(%rsp), %rax	#, tmp197
-	movq	%rax, 24(%rsp)	# tmp197, %sfp
-.LVL25:
-.L46:
+	subq	$328, %rsp	#,
+	.cfi_def_cfa_offset 384
+# signed_vs_unsigned.c:56: int main(void) {
+	.loc 1 56 0
+	movq	%fs:40, %rax	#, tmp244
+	movq	%rax, 312(%rsp)	# tmp244, D.2644
+	xorl	%eax, %eax	# tmp244
+# signed_vs_unsigned.c:57:     int a[] = {
+	.loc 1 57 0
+	movabsq	$4589934537, %rax	#, tmp249
+	movq	$294967291, 32(%rsp)	#, MEM[(int *)&a]
+	movq	$294367293, 40(%rsp)	#, MEM[(int *)&a + 8B]
+	movq	%rax, 56(%rsp)	# tmp249, MEM[(int *)&a + 24B]
+	subq	$39948, %rax	#, tmp250
+	movq	$294967293, 48(%rsp)	#, MEM[(int *)&a + 16B]
+	movq	%rax, 96(%rsp)	# tmp250, MEM[(int *)&a + 64B]
+# signed_vs_unsigned.c:62:     struct testcase { int (*fun)(); const char *name; clock_t t; } test[] = {
+	.loc 1 62 0
+	leaq	isprime_slow(%rip), %rax	#, tmp251
+# signed_vs_unsigned.c:57:     int a[] = {
+	.loc 1 57 0
+	movq	$294967251, 64(%rsp)	#, MEM[(int *)&a + 32B]
+	movq	$294965291, 72(%rsp)	#, MEM[(int *)&a + 40B]
+	movq	$294966291, 80(%rsp)	#, MEM[(int *)&a + 48B]
+	leaq	160(%rsp), %r13	#, ivtmp.59
+# signed_vs_unsigned.c:62:     struct testcase { int (*fun)(); const char *name; clock_t t; } test[] = {
+	.loc 1 62 0
+	movq	%rax, 160(%rsp)	# tmp251, test[0].fun
+	leaq	.LC0(%rip), %rax	#, tmp252
+# signed_vs_unsigned.c:57:     int a[] = {
+	.loc 1 57 0
+	movq	$294963293, 88(%rsp)	#, MEM[(int *)&a + 56B]
+	movq	$294961293, 104(%rsp)	#, MEM[(int *)&a + 72B]
+	movq	$294917293, 112(%rsp)	#, MEM[(int *)&a + 80B]
+# signed_vs_unsigned.c:62:     struct testcase { int (*fun)(); const char *name; clock_t t; } test[] = {
+	.loc 1 62 0
+	movq	%r13, %rbx	# ivtmp.59, ivtmp.92
+	movq	%rax, 168(%rsp)	# tmp252, test[0].name
+	leaq	unsigned_isprime_slow(%rip), %rax	#, tmp253
+# signed_vs_unsigned.c:57:     int a[] = {
+	.loc 1 57 0
+	movq	$294167293, 120(%rsp)	#, MEM[(int *)&a + 88B]
+	movq	$294267293, 128(%rsp)	#, MEM[(int *)&a + 96B]
+	movq	$294367293, 136(%rsp)	#, MEM[(int *)&a + 104B]
+# signed_vs_unsigned.c:62:     struct testcase { int (*fun)(); const char *name; clock_t t; } test[] = {
+	.loc 1 62 0
+	movq	%rax, 184(%rsp)	# tmp253, test[1].fun
+	leaq	.LC1(%rip), %rax	#, tmp254
+# signed_vs_unsigned.c:57:     int a[] = {
+	.loc 1 57 0
+	movq	$294467293, 144(%rsp)	#, MEM[(int *)&a + 112B]
+# signed_vs_unsigned.c:62:     struct testcase { int (*fun)(); const char *name; clock_t t; } test[] = {
+	.loc 1 62 0
+	movq	$0, 176(%rsp)	#, test[0].t
+	movq	$0, 200(%rsp)	#, test[1].t
+	movq	%rax, 192(%rsp)	# tmp254, test[1].name
+	leaq	isprime_fast(%rip), %rax	#, tmp255
+	movq	$0, 224(%rsp)	#, test[2].t
+	movq	%rax, 208(%rsp)	# tmp255, test[2].fun
+	leaq	.LC2(%rip), %rax	#, tmp256
+	movq	%rax, 216(%rsp)	# tmp256, test[2].name
+	leaq	unsigned_isprime_fast(%rip), %rax	#, tmp257
+	movq	%rax, 232(%rsp)	# tmp257, test[3].fun
+	leaq	.LC3(%rip), %rax	#, tmp258
+	movq	$0, 248(%rsp)	#, test[3].t
+	movq	$0, 272(%rsp)	#, test[4].t
+	movq	$0, 296(%rsp)	#, test[5].t
+.LVL32:
+	movq	%rax, 240(%rsp)	# tmp258, test[3].name
+	leaq	div_fast(%rip), %rax	#, tmp259
+	movq	%rax, 256(%rsp)	# tmp259, test[4].fun
+	leaq	.LC4(%rip), %rax	#, tmp260
+	movq	%rax, 264(%rsp)	# tmp260, test[4].name
+	leaq	unsigned_div_fast(%rip), %rax	#, tmp261
+	movq	%rax, 280(%rsp)	# tmp261, test[5].fun
+	leaq	.LC5(%rip), %rax	#, tmp262
+	movq	%rax, 288(%rsp)	# tmp262, test[5].name
+	leaq	96(%r13), %rax	#, _119
+	movq	%rax, 16(%rsp)	# _119, %sfp
+	leaq	32(%rsp), %rax	#, tmp277
+	movq	%rax, 24(%rsp)	# tmp277, %sfp
+.LVL33:
+.L56:
 .LBB36:
 .LBB37:
-# signed_vs_unsigned.c:58:         clock_t t = clock();
-	.loc 1 58 0
+# signed_vs_unsigned.c:72:         clock_t t = clock();
+	.loc 1 72 0
 	call	clock@PLT	#
-.LVL26:
+.LVL34:
 	movq	%rax, 8(%rsp)	#, %sfp
-.LVL27:
-	movq	24(%rsp), %rax	# %sfp, tmp197
-.LVL28:
-	xorl	%r14d, %r14d	# prephitmp_83
-	movl	$294967291, %r15d	#, pretmp_84
-	leaq	8(%rax), %r12	#, ivtmp.65
-	leaq	120(%rax), %rbp	#, _99
-	jmp	.L45	#
-.LVL29:
+.LVL35:
+	movq	24(%rsp), %rax	# %sfp, tmp242
+.LVL36:
+	xorl	%r14d, %r14d	# pretmp_13
+	movl	$294967291, %r15d	#, pretmp_17
+	leaq	8(%rax), %r12	#, ivtmp.79
+	leaq	120(%rax), %rbp	#, _110
+	jmp	.L55	#
+.LVL37:
 	.p2align 4,,10
 	.p2align 3
-.L52:
-	movl	(%r12), %r15d	# MEM[base: _97, offset: 0B], pretmp_84
-	movl	4(%r12), %r14d	# MEM[base: _97, offset: 4B], prephitmp_83
-	addq	$8, %r12	#, ivtmp.65
-.L45:
+.L62:
+	movl	(%r12), %r15d	# MEM[base: _108, offset: 0B], pretmp_17
+	movl	4(%r12), %r14d	# MEM[base: _108, offset: 4B], pretmp_13
+	addq	$8, %r12	#, ivtmp.79
+.L55:
 .LBB38:
-# signed_vs_unsigned.c:60:             if (test[n].fun(a[i]) != a[i + 1]) {
-	.loc 1 60 0
+# signed_vs_unsigned.c:74:             if (test[n].fun(a[i]) != a[i + 1]) {
+	.loc 1 74 0
 	xorl	%eax, %eax	#
-	movl	%r15d, %edi	# pretmp_84,
-	call	*(%rbx)	# MEM[base: _104, offset: 0B]
-.LVL30:
-	cmpl	%r14d, %eax	# prephitmp_83, _3
-	je	.L43	#,
-# signed_vs_unsigned.c:61:                 printf("%s(%d) != %d\n", test[n].name, a[i], a[i + 1]);
-	.loc 1 61 0
-	movq	8(%rbx), %rsi	# MEM[base: _104, offset: 8B], MEM[base: _104, offset: 8B]
-	leaq	.LC4(%rip), %rdi	#,
-	movl	%r14d, %ecx	# prephitmp_83,
-	movl	%r15d, %edx	# pretmp_84,
+	movl	%r15d, %edi	# pretmp_17,
+	call	*(%rbx)	# MEM[base: _115, offset: 0B]
+.LVL38:
+	cmpl	%r14d, %eax	# pretmp_13, _3
+	je	.L53	#,
+# signed_vs_unsigned.c:75:                 printf("%s(%d) != %d\n", test[n].name, a[i], a[i + 1]);
+	.loc 1 75 0
+	movq	8(%rbx), %rsi	# MEM[base: _115, offset: 8B], MEM[base: _115, offset: 8B]
+	leaq	.LC6(%rip), %rdi	#,
+	movl	%r14d, %ecx	# pretmp_13,
+	movl	%r15d, %edx	# pretmp_17,
 	xorl	%eax, %eax	#
 	call	printf@PLT	#
-.LVL31:
-.L43:
-# signed_vs_unsigned.c:59:         for (int i = 0; i < 30; i += 2) {
-	.loc 1 59 0 discriminator 2
-	cmpq	%rbp, %r12	# _99, ivtmp.65
-	jne	.L52	#,
+.LVL39:
+.L53:
+# signed_vs_unsigned.c:73:         for (int i = 0; i < 30; i += 2) {
+	.loc 1 73 0 discriminator 2
+	cmpq	%rbp, %r12	# _110, ivtmp.79
+	jne	.L62	#,
 .LBE38:
-# signed_vs_unsigned.c:64:         test[n].t = clock() - t;
-	.loc 1 64 0 discriminator 2
+# signed_vs_unsigned.c:78:         test[n].t = clock() - t;
+	.loc 1 78 0 discriminator 2
 	call	clock@PLT	#
-.LVL32:
-	subl	8(%rsp), %eax	# %sfp, tmp182
-	addq	$24, %rbx	#, ivtmp.78
-	movl	%eax, -8(%rbx)	# tmp182, MEM[base: _104, offset: 16B]
+.LVL40:
+	subq	8(%rsp), %rax	# %sfp, tmp189
+	addq	$24, %rbx	#, ivtmp.92
+	movq	%rax, -8(%rbx)	# tmp189, MEM[base: _115, offset: 16B]
 .LBE37:
-# signed_vs_unsigned.c:57:     for (int n = 0; n < 4; n++) {
-	.loc 1 57 0 discriminator 2
-	cmpq	16(%rsp), %rbx	# %sfp, ivtmp.78
-	jne	.L46	#,
+# signed_vs_unsigned.c:71:     for (int n = 0; n < 4; n++) {
+	.loc 1 71 0 discriminator 2
+	cmpq	16(%rsp), %rbx	# %sfp, ivtmp.92
+	jne	.L56	#,
 .LBE36:
 .LBB39:
-# signed_vs_unsigned.c:67:         printf("%21s: %4d.%03dms\n", test[n].name, test[n].t / 1000, test[n].t % 1000);
-	.loc 1 67 0
-	movl	$274877907, %ebp	#, tmp185
-.L47:
-# signed_vs_unsigned.c:67:         printf("%21s: %4d.%03dms\n", test[n].name, test[n].t / 1000, test[n].t % 1000);
-	.loc 1 67 0 is_stmt 0 discriminator 3
-	movl	16(%r13), %ecx	# MEM[base: _80, offset: 16B], _12
-	movq	8(%r13), %rsi	# MEM[base: _80, offset: 8B], MEM[base: _80, offset: 8B]
-	leaq	.LC5(%rip), %rdi	#,
-	addq	$24, %r13	#, ivtmp.45
-	movl	%ecx, %eax	# _12, tmp200
-	imull	%ebp	# tmp185
-	movl	%ecx, %eax	# _12, tmp187
-	sarl	$31, %eax	#, tmp187
-	sarl	$6, %edx	#, tmp186
-	subl	%eax, %edx	# tmp187, tmp183
-	imull	$1000, %edx, %eax	#, tmp183, tmp188
-	subl	%eax, %ecx	# tmp188, tmp189
+# signed_vs_unsigned.c:81:         printf("%21s: %4ld.%03ldms\n", test[n].name, test[n].t / 1000, test[n].t % 1000);
+	.loc 1 81 0
+	movabsq	$2361183241434822607, %rbp	#, tmp192
+.L57:
+# signed_vs_unsigned.c:81:         printf("%21s: %4ld.%03ldms\n", test[n].name, test[n].t / 1000, test[n].t % 1000);
+	.loc 1 81 0 is_stmt 0 discriminator 3
+	movq	16(%r13), %rcx	# MEM[base: _104, offset: 16B], _9
+	movq	8(%r13), %rsi	# MEM[base: _104, offset: 8B], MEM[base: _104, offset: 8B]
+	leaq	.LC7(%rip), %rdi	#,
+	addq	$24, %r13	#, ivtmp.59
+	movq	%rcx, %rax	# _9, tmp245
+	imulq	%rbp	# tmp192
+	movq	%rcx, %rax	# _9, tmp194
+	sarq	$63, %rax	#, tmp194
+	sarq	$7, %rdx	#, tmp193
+	subq	%rax, %rdx	# tmp194, tmp190
+	imulq	$1000, %rdx, %rax	#, tmp190, tmp195
+	subq	%rax, %rcx	# tmp195, tmp196
 	xorl	%eax, %eax	#
 	call	printf@PLT	#
-.LVL33:
-# signed_vs_unsigned.c:66:     for (int n = 0; n < 4; n++) {
-	.loc 1 66 0 is_stmt 1 discriminator 3
-	cmpq	%rbx, %r13	# ivtmp.78, ivtmp.45
-	jne	.L47	#,
+.LVL41:
+# signed_vs_unsigned.c:80:     for (int n = 0; n < 4; n++) {
+	.loc 1 80 0 is_stmt 1 discriminator 3
+	cmpq	%rbx, %r13	# ivtmp.92, ivtmp.59
+	jne	.L57	#,
+.LVL42:
 .LBE39:
-# signed_vs_unsigned.c:70: }
-	.loc 1 70 0
+.LBB40:
+# signed_vs_unsigned.c:84: 	printf("%21s: %ld.%03ldμs\n", test[n].name, test[n].t / 100, test[n].t % 100);
+	.loc 1 84 0
+	movq	176(%rsp), %rcx	# test[0].t, _91
+	movabsq	$-6640827866535438581, %rbx	#, tmp205
+	leaq	.LC0(%rip), %rsi	#,
+	leaq	.LC8(%rip), %rdi	#,
+	movq	%rcx, %rax	# _91, tmp246
+	imulq	%rbx	# tmp205
+	movq	%rcx, %rax	# _91, tmp208
+	sarq	$63, %rax	#, tmp208
+	addq	%rcx, %rdx	# _91, tmp206
+	sarq	$6, %rdx	#, tmp207
+	subq	%rax, %rdx	# tmp208, tmp203
+	leaq	(%rdx,%rdx,4), %rax	#, tmp211
+	leaq	(%rax,%rax,4), %rax	#, tmp213
+	salq	$2, %rax	#, tmp214
+	subq	%rax, %rcx	# tmp214, tmp215
 	xorl	%eax, %eax	#
-	movq	248(%rsp), %rcx	# D.2606, tmp201
-	xorq	%fs:40, %rcx	#, tmp201
-	jne	.L53	#,
-	addq	$264, %rsp	#,
+	call	printf@PLT	#
+.LVL43:
+	movq	200(%rsp), %rcx	# test[1].t, _99
+	leaq	.LC1(%rip), %rsi	#,
+	leaq	.LC8(%rip), %rdi	#,
+	movq	%rcx, %rax	# _99, tmp247
+	imulq	%rbx	# tmp205
+	movq	%rcx, %rax	# _99, tmp227
+	sarq	$63, %rax	#, tmp227
+	addq	%rcx, %rdx	# _99, tmp225
+	sarq	$6, %rdx	#, tmp226
+	subq	%rax, %rdx	# tmp227, tmp222
+	leaq	(%rdx,%rdx,4), %rax	#, tmp230
+	leaq	(%rax,%rax,4), %rax	#, tmp232
+	salq	$2, %rax	#, tmp233
+	subq	%rax, %rcx	# tmp233, tmp234
+	xorl	%eax, %eax	#
+	call	printf@PLT	#
+.LVL44:
+.LBE40:
+# signed_vs_unsigned.c:88: }
+	.loc 1 88 0
+	xorl	%eax, %eax	#
+	movq	312(%rsp), %rdx	# D.2644, tmp248
+	xorq	%fs:40, %rdx	#, tmp248
+	jne	.L63	#,
+	addq	$328, %rsp	#,
 	.cfi_remember_state
 	.cfi_def_cfa_offset 56
 	popq	%rbx	#
@@ -632,12 +764,12 @@ main:
 	popq	%r15	#
 	.cfi_def_cfa_offset 8
 	ret
-.L53:
+.L63:
 	.cfi_restore_state
 	call	__stack_chk_fail@PLT	#
-.LVL34:
+.LVL45:
 	.cfi_endproc
-.LFE15:
+.LFE17:
 	.size	main, .-main
 	.text
 .Letext0:
@@ -650,15 +782,15 @@ main:
 	.file 8 "/usr/include/time.h"
 	.section	.debug_info,"",@progbits
 .Ldebug_info0:
-	.long	0x700
+	.long	0x7ef
 	.value	0x4
 	.long	.Ldebug_abbrev0
 	.byte	0x8
 	.uleb128 0x1
-	.long	.LASF796
+	.long	.LASF799
 	.byte	0xc
-	.long	.LASF797
-	.long	.LASF798
+	.long	.LASF800
+	.long	.LASF801
 	.long	.Ldebug_ranges0+0xc0
 	.quad	0
 	.long	.Ldebug_line0
@@ -908,7 +1040,7 @@ main:
 	.byte	0xc4
 	.byte	0
 	.uleb128 0xb
-	.long	.LASF799
+	.long	.LASF802
 	.byte	0x4
 	.byte	0x96
 	.uleb128 0x8
@@ -960,7 +1092,7 @@ main:
 	.byte	0x13
 	.byte	0
 	.uleb128 0xe
-	.long	.LASF800
+	.long	.LASF803
 	.uleb128 0xf
 	.long	.LASF772
 	.byte	0x4
@@ -1056,56 +1188,56 @@ main:
 	.byte	0xaf
 	.long	0x69
 	.uleb128 0x12
-	.long	.LASF801
+	.long	.LASF790
 	.byte	0x1
-	.byte	0x2c
+	.byte	0x38
 	.long	0x62
-	.quad	.LFB15
-	.quad	.LFE15-.LFB15
+	.quad	.LFB17
+	.quad	.LFE17-.LFB17
 	.uleb128 0x1
 	.byte	0x9c
-	.long	0x4d2
+	.long	0x549
 	.uleb128 0x13
 	.string	"a"
 	.byte	0x1
-	.byte	0x2d
-	.long	0x4d2
+	.byte	0x39
+	.long	0x549
 	.uleb128 0x3
 	.byte	0x91
-	.sleb128 -192
+	.sleb128 -352
 	.uleb128 0x8
 	.long	.LASF787
 	.byte	0x18
 	.byte	0x1
-	.byte	0x32
+	.byte	0x3e
 	.long	0x3c1
 	.uleb128 0x14
 	.string	"fun"
 	.byte	0x1
-	.byte	0x32
-	.long	0x4ed
+	.byte	0x3e
+	.long	0x564
 	.byte	0
 	.uleb128 0x9
 	.long	.LASF788
 	.byte	0x1
-	.byte	0x32
+	.byte	0x3e
 	.long	0x2b5
 	.byte	0x8
 	.uleb128 0x14
 	.string	"t"
 	.byte	0x1
-	.byte	0x32
-	.long	0x62
+	.byte	0x3e
+	.long	0x307
 	.byte	0x10
 	.byte	0
 	.uleb128 0x15
 	.long	.LASF789
 	.byte	0x1
-	.byte	0x32
-	.long	0x4f3
+	.byte	0x3e
+	.long	0x56a
 	.uleb128 0x3
 	.byte	0x91
-	.sleb128 -288
+	.sleb128 -224
 	.uleb128 0x16
 	.quad	.LBB36
 	.quad	.LBE36-.LBB36
@@ -1113,18 +1245,18 @@ main:
 	.uleb128 0x17
 	.string	"n"
 	.byte	0x1
-	.byte	0x39
+	.byte	0x47
 	.long	0x62
-	.long	.LLST4
+	.long	.LLST6
 	.uleb128 0x18
 	.quad	.LBB37
 	.quad	.LBE37-.LBB37
 	.uleb128 0x17
 	.string	"t"
 	.byte	0x1
-	.byte	0x3a
+	.byte	0x48
 	.long	0x307
-	.long	.LLST5
+	.long	.LLST7
 	.uleb128 0x16
 	.quad	.LBB38
 	.quad	.LBE38-.LBB38
@@ -1132,11 +1264,11 @@ main:
 	.uleb128 0x17
 	.string	"i"
 	.byte	0x1
-	.byte	0x3b
+	.byte	0x49
 	.long	0x62
-	.long	.LLST6
+	.long	.LLST8
 	.uleb128 0x19
-	.quad	.LVL30
+	.quad	.LVL38
 	.long	0x446
 	.uleb128 0x1a
 	.uleb128 0x1
@@ -1146,14 +1278,14 @@ main:
 	.sleb128 0
 	.byte	0
 	.uleb128 0x1b
-	.quad	.LVL31
-	.long	0x6e3
+	.quad	.LVL39
+	.long	0x7d2
 	.uleb128 0x1a
 	.uleb128 0x1
 	.byte	0x55
 	.uleb128 0x9
 	.byte	0x3
-	.quad	.LC4
+	.quad	.LC6
 	.uleb128 0x1a
 	.uleb128 0x1
 	.byte	0x51
@@ -1169,11 +1301,11 @@ main:
 	.byte	0
 	.byte	0
 	.uleb128 0x1c
-	.quad	.LVL26
-	.long	0x6ef
+	.quad	.LVL34
+	.long	0x7de
 	.uleb128 0x1c
-	.quad	.LVL32
-	.long	0x6ef
+	.quad	.LVL40
+	.long	0x7de
 	.byte	0
 	.byte	0
 	.uleb128 0x16
@@ -1183,58 +1315,150 @@ main:
 	.uleb128 0x1d
 	.string	"n"
 	.byte	0x1
-	.byte	0x42
+	.byte	0x50
 	.long	0x62
 	.uleb128 0x1b
-	.quad	.LVL33
-	.long	0x6e3
+	.quad	.LVL41
+	.long	0x7d2
 	.uleb128 0x1a
 	.uleb128 0x1
 	.byte	0x55
 	.uleb128 0x9
 	.byte	0x3
-	.quad	.LC5
+	.quad	.LC7
+	.byte	0
+	.byte	0
+	.uleb128 0x16
+	.quad	.LBB40
+	.quad	.LBE40-.LBB40
+	.long	0x53b
+	.uleb128 0x17
+	.string	"n"
+	.byte	0x1
+	.byte	0x53
+	.long	0x62
+	.long	.LLST9
+	.uleb128 0x1e
+	.quad	.LVL43
+	.long	0x7d2
+	.long	0x512
+	.uleb128 0x1a
+	.uleb128 0x1
+	.byte	0x55
+	.uleb128 0x9
+	.byte	0x3
+	.quad	.LC8
+	.uleb128 0x1a
+	.uleb128 0x1
+	.byte	0x54
+	.uleb128 0x9
+	.byte	0x3
+	.quad	.LC0
+	.byte	0
+	.uleb128 0x1b
+	.quad	.LVL44
+	.long	0x7d2
+	.uleb128 0x1a
+	.uleb128 0x1
+	.byte	0x55
+	.uleb128 0x9
+	.byte	0x3
+	.quad	.LC8
+	.uleb128 0x1a
+	.uleb128 0x1
+	.byte	0x54
+	.uleb128 0x9
+	.byte	0x3
+	.quad	.LC1
 	.byte	0
 	.byte	0
 	.uleb128 0x1c
-	.quad	.LVL34
-	.long	0x6fa
+	.quad	.LVL45
+	.long	0x7e9
 	.byte	0
 	.uleb128 0xc
 	.long	0x62
-	.long	0x4e2
+	.long	0x559
 	.uleb128 0xd
 	.long	0x38
 	.byte	0x1d
 	.byte	0
-	.uleb128 0x1e
-	.long	0x62
-	.long	0x4ed
 	.uleb128 0x1f
+	.long	0x62
+	.long	0x564
+	.uleb128 0x20
 	.byte	0
 	.uleb128 0x6
 	.byte	0x8
-	.long	0x4e2
+	.long	0x559
 	.uleb128 0xc
 	.long	0x392
-	.long	0x503
+	.long	0x57a
 	.uleb128 0xd
 	.long	0x38
-	.byte	0x3
+	.byte	0x5
 	.byte	0
-	.uleb128 0x20
-	.long	.LASF790
+	.uleb128 0x12
+	.long	.LASF791
+	.byte	0x1
+	.byte	0x32
+	.long	0x62
+	.quad	.LFB16
+	.quad	.LFE16-.LFB16
+	.uleb128 0x1
+	.byte	0x9c
+	.long	0x5b6
+	.uleb128 0x21
+	.string	"num"
+	.byte	0x1
+	.byte	0x32
+	.long	0x4d
+	.uleb128 0x1
+	.byte	0x55
+	.uleb128 0x17
+	.string	"i"
+	.byte	0x1
+	.byte	0x33
+	.long	0x4d
+	.long	.LLST1
+	.byte	0
+	.uleb128 0x12
+	.long	.LASF792
+	.byte	0x1
+	.byte	0x2c
+	.long	0x62
+	.quad	.LFB15
+	.quad	.LFE15-.LFB15
+	.uleb128 0x1
+	.byte	0x9c
+	.long	0x5f2
+	.uleb128 0x21
+	.string	"num"
+	.byte	0x1
+	.byte	0x2c
+	.long	0x62
+	.uleb128 0x1
+	.byte	0x55
+	.uleb128 0x17
+	.string	"i"
+	.byte	0x1
+	.byte	0x2d
+	.long	0x62
+	.long	.LLST0
+	.byte	0
+	.uleb128 0x22
+	.long	.LASF793
 	.byte	0x1
 	.byte	0x22
 	.long	0x62
 	.byte	0x1
-	.long	0x52a
-	.uleb128 0x21
+	.long	0x619
+	.uleb128 0x23
 	.string	"num"
 	.byte	0x1
 	.byte	0x22
 	.long	0x4d
-	.uleb128 0x22
+	.uleb128 0x24
 	.uleb128 0x1d
 	.string	"i"
 	.byte	0x1
@@ -1242,19 +1466,19 @@ main:
 	.long	0x4d
 	.byte	0
 	.byte	0
-	.uleb128 0x20
-	.long	.LASF791
+	.uleb128 0x22
+	.long	.LASF794
 	.byte	0x1
 	.byte	0x18
 	.long	0x62
 	.byte	0x1
-	.long	0x551
-	.uleb128 0x21
+	.long	0x640
+	.uleb128 0x23
 	.string	"num"
 	.byte	0x1
 	.byte	0x18
 	.long	0x62
-	.uleb128 0x22
+	.uleb128 0x24
 	.uleb128 0x1d
 	.string	"i"
 	.byte	0x1
@@ -1262,19 +1486,19 @@ main:
 	.long	0x62
 	.byte	0
 	.byte	0
-	.uleb128 0x20
-	.long	.LASF792
+	.uleb128 0x22
+	.long	.LASF795
 	.byte	0x1
 	.byte	0xe
 	.long	0x62
 	.byte	0x1
-	.long	0x578
-	.uleb128 0x21
+	.long	0x667
+	.uleb128 0x23
 	.string	"num"
 	.byte	0x1
 	.byte	0xe
 	.long	0x4d
-	.uleb128 0x22
+	.uleb128 0x24
 	.uleb128 0x1d
 	.string	"i"
 	.byte	0x1
@@ -1282,19 +1506,19 @@ main:
 	.long	0x4d
 	.byte	0
 	.byte	0
-	.uleb128 0x20
-	.long	.LASF793
+	.uleb128 0x22
+	.long	.LASF796
 	.byte	0x1
 	.byte	0x4
 	.long	0x62
 	.byte	0x1
-	.long	0x59f
-	.uleb128 0x21
+	.long	0x68e
+	.uleb128 0x23
 	.string	"num"
 	.byte	0x1
 	.byte	0x4
 	.long	0x62
-	.uleb128 0x22
+	.uleb128 0x24
 	.uleb128 0x1d
 	.string	"i"
 	.byte	0x1
@@ -1302,123 +1526,123 @@ main:
 	.long	0x62
 	.byte	0
 	.byte	0
-	.uleb128 0x23
-	.long	0x578
+	.uleb128 0x25
+	.long	0x667
 	.quad	.LFB11
 	.quad	.LFE11-.LFB11
 	.uleb128 0x1
 	.byte	0x9c
-	.long	0x5fc
-	.uleb128 0x24
-	.long	0x588
+	.long	0x6eb
+	.uleb128 0x26
+	.long	0x677
 	.uleb128 0x1
 	.byte	0x55
-	.uleb128 0x25
-	.long	0x578
+	.uleb128 0x27
+	.long	0x667
 	.quad	.LBB9
 	.quad	.LBE9-.LBB9
-	.uleb128 0x26
-	.long	0x588
-	.uleb128 0x25
-	.long	0x593
+	.uleb128 0x28
+	.long	0x677
+	.uleb128 0x27
+	.long	0x682
 	.quad	.LBB11
 	.quad	.LBE11-.LBB11
-	.uleb128 0x27
-	.long	0x594
-	.long	.LLST0
-	.byte	0
-	.byte	0
-	.byte	0
-	.uleb128 0x23
-	.long	0x551
-	.quad	.LFB12
-	.quad	.LFE12-.LFB12
-	.uleb128 0x1
-	.byte	0x9c
-	.long	0x641
-	.uleb128 0x24
-	.long	0x561
-	.uleb128 0x1
-	.byte	0x55
-	.uleb128 0x28
-	.long	0x551
-	.long	.Ldebug_ranges0+0
-	.uleb128 0x26
-	.long	0x561
-	.uleb128 0x28
-	.long	0x56c
-	.long	.Ldebug_ranges0+0x30
-	.uleb128 0x27
-	.long	0x56d
-	.long	.LLST1
-	.byte	0
-	.byte	0
-	.byte	0
-	.uleb128 0x23
-	.long	0x52a
-	.quad	.LFB13
-	.quad	.LFE13-.LFB13
-	.uleb128 0x1
-	.byte	0x9c
-	.long	0x69e
-	.uleb128 0x24
-	.long	0x53a
-	.uleb128 0x1
-	.byte	0x55
-	.uleb128 0x25
-	.long	0x52a
-	.quad	.LBB24
-	.quad	.LBE24-.LBB24
-	.uleb128 0x26
-	.long	0x53a
-	.uleb128 0x25
-	.long	0x545
-	.quad	.LBB26
-	.quad	.LBE26-.LBB26
-	.uleb128 0x27
-	.long	0x546
+	.uleb128 0x29
+	.long	0x683
 	.long	.LLST2
 	.byte	0
 	.byte	0
 	.byte	0
-	.uleb128 0x23
-	.long	0x503
-	.quad	.LFB14
-	.quad	.LFE14-.LFB14
+	.uleb128 0x25
+	.long	0x640
+	.quad	.LFB12
+	.quad	.LFE12-.LFB12
 	.uleb128 0x1
 	.byte	0x9c
-	.long	0x6e3
-	.uleb128 0x24
-	.long	0x513
+	.long	0x730
+	.uleb128 0x26
+	.long	0x650
 	.uleb128 0x1
 	.byte	0x55
+	.uleb128 0x2a
+	.long	0x640
+	.long	.Ldebug_ranges0+0
 	.uleb128 0x28
-	.long	0x503
-	.long	.Ldebug_ranges0+0x60
-	.uleb128 0x26
-	.long	0x513
-	.uleb128 0x28
-	.long	0x51e
-	.long	.Ldebug_ranges0+0x90
-	.uleb128 0x27
-	.long	0x51f
+	.long	0x650
+	.uleb128 0x2a
+	.long	0x65b
+	.long	.Ldebug_ranges0+0x30
+	.uleb128 0x29
+	.long	0x65c
 	.long	.LLST3
 	.byte	0
 	.byte	0
 	.byte	0
+	.uleb128 0x25
+	.long	0x619
+	.quad	.LFB13
+	.quad	.LFE13-.LFB13
+	.uleb128 0x1
+	.byte	0x9c
+	.long	0x78d
+	.uleb128 0x26
+	.long	0x629
+	.uleb128 0x1
+	.byte	0x55
+	.uleb128 0x27
+	.long	0x619
+	.quad	.LBB24
+	.quad	.LBE24-.LBB24
+	.uleb128 0x28
+	.long	0x629
+	.uleb128 0x27
+	.long	0x634
+	.quad	.LBB26
+	.quad	.LBE26-.LBB26
 	.uleb128 0x29
-	.long	.LASF794
-	.long	.LASF794
+	.long	0x635
+	.long	.LLST4
+	.byte	0
+	.byte	0
+	.byte	0
+	.uleb128 0x25
+	.long	0x5f2
+	.quad	.LFB14
+	.quad	.LFE14-.LFB14
+	.uleb128 0x1
+	.byte	0x9c
+	.long	0x7d2
+	.uleb128 0x26
+	.long	0x602
+	.uleb128 0x1
+	.byte	0x55
+	.uleb128 0x2a
+	.long	0x5f2
+	.long	.Ldebug_ranges0+0x60
+	.uleb128 0x28
+	.long	0x602
+	.uleb128 0x2a
+	.long	0x60d
+	.long	.Ldebug_ranges0+0x90
+	.uleb128 0x29
+	.long	0x60e
+	.long	.LLST5
+	.byte	0
+	.byte	0
+	.byte	0
+	.uleb128 0x2b
+	.long	.LASF797
+	.long	.LASF797
 	.byte	0x5
 	.value	0x13e
-	.uleb128 0x2a
-	.long	.LASF795
-	.long	.LASF795
+	.uleb128 0x2c
+	.long	.LASF798
+	.long	.LASF798
 	.byte	0x8
 	.byte	0x48
-	.uleb128 0x2b
-	.long	.LASF802
-	.long	.LASF802
+	.uleb128 0x2d
+	.long	.LASF804
+	.long	.LASF804
 	.byte	0
 	.section	.debug_abbrev,"",@progbits
 .Ldebug_abbrev0:
@@ -1780,6 +2004,17 @@ main:
 	.byte	0
 	.byte	0
 	.uleb128 0x1e
+	.uleb128 0x4109
+	.byte	0x1
+	.uleb128 0x11
+	.uleb128 0x1
+	.uleb128 0x31
+	.uleb128 0x13
+	.uleb128 0x1
+	.uleb128 0x13
+	.byte	0
+	.byte	0
+	.uleb128 0x1f
 	.uleb128 0x15
 	.byte	0x1
 	.uleb128 0x49
@@ -1788,12 +2023,27 @@ main:
 	.uleb128 0x13
 	.byte	0
 	.byte	0
-	.uleb128 0x1f
+	.uleb128 0x20
 	.uleb128 0x18
 	.byte	0
 	.byte	0
 	.byte	0
-	.uleb128 0x20
+	.uleb128 0x21
+	.uleb128 0x5
+	.byte	0
+	.uleb128 0x3
+	.uleb128 0x8
+	.uleb128 0x3a
+	.uleb128 0xb
+	.uleb128 0x3b
+	.uleb128 0xb
+	.uleb128 0x49
+	.uleb128 0x13
+	.uleb128 0x2
+	.uleb128 0x18
+	.byte	0
+	.byte	0
+	.uleb128 0x22
 	.uleb128 0x2e
 	.byte	0x1
 	.uleb128 0x3f
@@ -1814,7 +2064,7 @@ main:
 	.uleb128 0x13
 	.byte	0
 	.byte	0
-	.uleb128 0x21
+	.uleb128 0x23
 	.uleb128 0x5
 	.byte	0
 	.uleb128 0x3
@@ -1827,12 +2077,12 @@ main:
 	.uleb128 0x13
 	.byte	0
 	.byte	0
-	.uleb128 0x22
+	.uleb128 0x24
 	.uleb128 0xb
 	.byte	0x1
 	.byte	0
 	.byte	0
-	.uleb128 0x23
+	.uleb128 0x25
 	.uleb128 0x2e
 	.byte	0x1
 	.uleb128 0x31
@@ -1849,7 +2099,7 @@ main:
 	.uleb128 0x13
 	.byte	0
 	.byte	0
-	.uleb128 0x24
+	.uleb128 0x26
 	.uleb128 0x5
 	.byte	0
 	.uleb128 0x31
@@ -1858,7 +2108,7 @@ main:
 	.uleb128 0x18
 	.byte	0
 	.byte	0
-	.uleb128 0x25
+	.uleb128 0x27
 	.uleb128 0xb
 	.byte	0x1
 	.uleb128 0x31
@@ -1869,14 +2119,14 @@ main:
 	.uleb128 0x7
 	.byte	0
 	.byte	0
-	.uleb128 0x26
+	.uleb128 0x28
 	.uleb128 0x5
 	.byte	0
 	.uleb128 0x31
 	.uleb128 0x13
 	.byte	0
 	.byte	0
-	.uleb128 0x27
+	.uleb128 0x29
 	.uleb128 0x34
 	.byte	0
 	.uleb128 0x31
@@ -1885,7 +2135,7 @@ main:
 	.uleb128 0x17
 	.byte	0
 	.byte	0
-	.uleb128 0x28
+	.uleb128 0x2a
 	.uleb128 0xb
 	.byte	0x1
 	.uleb128 0x31
@@ -1894,7 +2144,7 @@ main:
 	.uleb128 0x17
 	.byte	0
 	.byte	0
-	.uleb128 0x29
+	.uleb128 0x2b
 	.uleb128 0x2e
 	.byte	0
 	.uleb128 0x3f
@@ -1911,7 +2161,7 @@ main:
 	.uleb128 0x5
 	.byte	0
 	.byte	0
-	.uleb128 0x2a
+	.uleb128 0x2c
 	.uleb128 0x2e
 	.byte	0
 	.uleb128 0x3f
@@ -1928,7 +2178,7 @@ main:
 	.uleb128 0xb
 	.byte	0
 	.byte	0
-	.uleb128 0x2b
+	.uleb128 0x2d
 	.uleb128 0x2e
 	.byte	0
 	.uleb128 0x3f
@@ -1944,78 +2194,125 @@ main:
 	.byte	0
 	.section	.debug_loc,"",@progbits
 .Ldebug_loc0:
-.LLST4:
-	.quad	.LVL24
-	.quad	.LVL25
+.LLST6:
+	.quad	.LVL32
+	.quad	.LVL33
 	.value	0x2
 	.byte	0x30
 	.byte	0x9f
 	.quad	0
 	.quad	0
-.LLST5:
-	.quad	.LVL27
-	.quad	.LVL28
+.LLST7:
+	.quad	.LVL35
+	.quad	.LVL36
 	.value	0x1
 	.byte	0x50
-	.quad	.LVL28
-	.quad	.LFE15
+	.quad	.LVL36
+	.quad	.LFE17
 	.value	0x3
 	.byte	0x91
-	.sleb128 -312
+	.sleb128 -376
 	.quad	0
 	.quad	0
-.LLST6:
-	.quad	.LVL27
-	.quad	.LVL29
+.LLST8:
+	.quad	.LVL35
+	.quad	.LVL37
 	.value	0x2
 	.byte	0x30
+	.byte	0x9f
+	.quad	0
+	.quad	0
+.LLST9:
+	.quad	.LVL42
+	.quad	.LVL43
+	.value	0x2
+	.byte	0x30
+	.byte	0x9f
+	.quad	.LVL43
+	.quad	.LVL44
+	.value	0x2
+	.byte	0x31
+	.byte	0x9f
+	.quad	.LVL44
+	.quad	.LFE17
+	.value	0x2
+	.byte	0x32
+	.byte	0x9f
+	.quad	0
+	.quad	0
+.LLST1:
+	.quad	.LVL4
+	.quad	.LVL5
+	.value	0x2
+	.byte	0x31
+	.byte	0x9f
+	.quad	.LVL5
+	.quad	.LVL7
+	.value	0x1
+	.byte	0x52
+	.quad	.LVL7
+	.quad	.LFE16
+	.value	0x2
+	.byte	0x31
 	.byte	0x9f
 	.quad	0
 	.quad	0
 .LLST0:
+	.quad	.LVL0
 	.quad	.LVL1
-	.quad	.LVL2
 	.value	0x2
-	.byte	0x33
+	.byte	0x31
 	.byte	0x9f
-	.quad	.LVL2
-	.quad	.LVL5
-	.value	0x1
-	.byte	0x52
-	.quad	0
-	.quad	0
-.LLST1:
-	.quad	.LVL7
-	.quad	.LVL8
-	.value	0x2
-	.byte	0x33
-	.byte	0x9f
-	.quad	.LVL8
-	.quad	.LVL11
+	.quad	.LVL1
+	.quad	.LVL3
 	.value	0x1
 	.byte	0x52
 	.quad	0
 	.quad	0
 .LLST2:
-	.quad	.LVL13
-	.quad	.LVL14
+	.quad	.LVL9
+	.quad	.LVL10
 	.value	0x2
 	.byte	0x33
 	.byte	0x9f
-	.quad	.LVL14
-	.quad	.LVL17
+	.quad	.LVL10
+	.quad	.LVL13
 	.value	0x1
 	.byte	0x52
 	.quad	0
 	.quad	0
 .LLST3:
-	.quad	.LVL19
-	.quad	.LVL20
+	.quad	.LVL15
+	.quad	.LVL16
 	.value	0x2
 	.byte	0x33
 	.byte	0x9f
-	.quad	.LVL20
-	.quad	.LVL23
+	.quad	.LVL16
+	.quad	.LVL19
+	.value	0x1
+	.byte	0x52
+	.quad	0
+	.quad	0
+.LLST4:
+	.quad	.LVL21
+	.quad	.LVL22
+	.value	0x2
+	.byte	0x33
+	.byte	0x9f
+	.quad	.LVL22
+	.quad	.LVL25
+	.value	0x1
+	.byte	0x52
+	.quad	0
+	.quad	0
+.LLST5:
+	.quad	.LVL27
+	.quad	.LVL28
+	.value	0x2
+	.byte	0x33
+	.byte	0x9f
+	.quad	.LVL28
+	.quad	.LVL31
 	.value	0x1
 	.byte	0x52
 	.quad	0
@@ -2030,8 +2327,8 @@ main:
 	.value	0
 	.quad	.Ltext0
 	.quad	.Letext0-.Ltext0
-	.quad	.LFB15
-	.quad	.LFE15-.LFB15
+	.quad	.LFB17
+	.quad	.LFE17-.LFB17
 	.quad	0
 	.quad	0
 	.section	.debug_ranges,"",@progbits
@@ -2062,8 +2359,8 @@ main:
 	.quad	0
 	.quad	.Ltext0
 	.quad	.Letext0
-	.quad	.LFB15
-	.quad	.LFE15
+	.quad	.LFB17
+	.quad	.LFE17
 	.quad	0
 	.quad	0
 	.section	.debug_macro,"",@progbits
@@ -4745,7 +5042,9 @@ main:
 	.string	"linux 1"
 .LASF333:
 	.string	"__gnu_linux__ 1"
-.LASF796:
+.LASF792:
+	.string	"div_fast"
+.LASF799:
 	.string	"GNU C11 7.3.0 -mtune=generic -march=x86-64 -ggdb3 -O2"
 .LASF440:
 	.string	"__attribute_noinline__ __attribute__ ((__noinline__))"
@@ -4763,7 +5062,7 @@ main:
 	.string	"__daylight"
 .LASF415:
 	.string	"__P(args) args"
-.LASF792:
+.LASF795:
 	.string	"unsigned_isprime_slow"
 .LASF498:
 	.string	"__SIZE_T__ "
@@ -4901,7 +5200,7 @@ main:
 	.string	"__FLT128_MIN_EXP__ (-16381)"
 .LASF71:
 	.string	"__UINT_FAST64_TYPE__ long unsigned int"
-.LASF798:
+.LASF801:
 	.string	"/store/code/projects"
 .LASF56:
 	.string	"__INT_LEAST8_TYPE__ signed char"
@@ -4919,7 +5218,7 @@ main:
 	.string	"__SUSECONDS_T_TYPE __SYSCALL_SLONG_TYPE"
 .LASF201:
 	.string	"__FLT32_MAX_EXP__ 128"
-.LASF801:
+.LASF790:
 	.string	"main"
 .LASF689:
 	.string	"FOPEN_MAX 16"
@@ -4951,8 +5250,8 @@ main:
 	.string	"__STDC_IEC_559__ 1"
 .LASF24:
 	.string	"__SIZEOF_LONG__ 8"
-.LASF680:
-	.string	"SEEK_CUR 1"
+.LASF437:
+	.string	"__attribute_pure__ __attribute__ ((__pure__))"
 .LASF28:
 	.string	"__SIZEOF_DOUBLE__ 8"
 .LASF121:
@@ -4979,6 +5278,8 @@ main:
 	.string	"__INO_T_TYPE __SYSCALL_ULONG_TYPE"
 .LASF157:
 	.string	"__FLT_MIN_10_EXP__ (-37)"
+.LASF680:
+	.string	"SEEK_CUR 1"
 .LASF160:
 	.string	"__FLT_DECIMAL_DIG__ 9"
 .LASF730:
@@ -5061,7 +5362,7 @@ main:
 	.string	"__SIZEOF_SHORT__ 2"
 .LASF781:
 	.string	"__tzname"
-.LASF800:
+.LASF803:
 	.string	"_IO_FILE_plus"
 .LASF456:
 	.string	"__restrict_arr __restrict"
@@ -5107,7 +5408,7 @@ main:
 	.string	"_IO_EOF_SEEN 0x10"
 .LASF316:
 	.string	"__x86_64__ 1"
-.LASF799:
+.LASF802:
 	.string	"_IO_lock_t"
 .LASF641:
 	.string	"_IO_OCT 040"
@@ -5175,7 +5476,7 @@ main:
 	.string	"__KERNEL_STRICT_NAMES "
 .LASF779:
 	.string	"sys_errlist"
-.LASF791:
+.LASF794:
 	.string	"isprime_fast"
 .LASF632:
 	.string	"_IO_USER_LOCK 0x8000"
@@ -5215,7 +5516,7 @@ main:
 	.string	"__GNUC_VA_LIST "
 .LASF699:
 	.string	"_TIME_H 1"
-.LASF794:
+.LASF797:
 	.string	"printf"
 .LASF103:
 	.string	"__SIG_ATOMIC_MIN__ (-__SIG_ATOMIC_MAX__ - 1)"
@@ -5333,7 +5634,7 @@ main:
 	.string	"_POSIX_SOURCE"
 .LASF383:
 	.string	"__USE_ISOC95 1"
-.LASF790:
+.LASF793:
 	.string	"unsigned_isprime_fast"
 .LASF470:
 	.string	"__glibc_macro_warning(message) __glibc_macro_warning1 (GCC warning message)"
@@ -5399,7 +5700,7 @@ main:
 	.string	"__FLT32X_HAS_DENORM__ 1"
 .LASF154:
 	.string	"__FLT_MANT_DIG__ 24"
-.LASF795:
+.LASF798:
 	.string	"clock"
 .LASF646:
 	.string	"_IO_SHOWPOS 02000"
@@ -5451,7 +5752,7 @@ main:
 	.string	"__GCC_ATOMIC_LONG_LOCK_FREE 2"
 .LASF514:
 	.string	"__need_size_t"
-.LASF802:
+.LASF804:
 	.string	"__stack_chk_fail"
 .LASF504:
 	.string	"_SIZE_T_ "
@@ -5896,8 +6197,6 @@ main:
 	.string	"__stub_sigreturn "
 .LASF773:
 	.string	"_IO_2_1_stdout_"
-.LASF437:
-	.string	"__attribute_pure__ __attribute__ ((__pure__))"
 .LASF398:
 	.string	"__USE_ATFILE 1"
 .LASF351:
@@ -6004,8 +6303,8 @@ main:
 	.string	"__ATOMIC_RELAXED 0"
 .LASF434:
 	.string	"__ASMNAME2(prefix,cname) __STRING (prefix) cname"
-.LASF180:
-	.string	"__DBL_HAS_INFINITY__ 1"
+.LASF791:
+	.string	"unsigned_div_fast"
 .LASF102:
 	.string	"__SIG_ATOMIC_MAX__ 0x7fffffff"
 .LASF295:
@@ -6208,6 +6507,8 @@ main:
 	.string	"__UINT_LEAST32_MAX__ 0xffffffffU"
 .LASF485:
 	.string	"__stub_sstk "
+.LASF180:
+	.string	"__DBL_HAS_INFINITY__ 1"
 .LASF427:
 	.string	"__errordecl(name,msg) extern void name (void) __attribute__((__error__ (msg)))"
 .LASF472:
@@ -6230,7 +6531,7 @@ main:
 	.string	"__STDC_NO_THREADS__ 1"
 .LASF275:
 	.string	"__DEC64_MIN_EXP__ (-382)"
-.LASF797:
+.LASF800:
 	.string	"signed_vs_unsigned.c"
 .LASF13:
 	.string	"__ATOMIC_ACQ_REL 4"
@@ -6248,7 +6549,7 @@ main:
 	.string	"__pad1"
 .LASF487:
 	.string	"__GLIBC_USE_LIB_EXT2"
-.LASF793:
+.LASF796:
 	.string	"isprime_slow"
 .LASF387:
 	.string	"_POSIX_C_SOURCE"
