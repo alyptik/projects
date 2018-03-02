@@ -1,10 +1,11 @@
 *
 !*.*
 /*/
+!/arduino/
+!/colorization/
+!/net/
 !/school/
 !/templates/
-!/arduino/
-!/net/
 *\~
 *.o
 *.so
