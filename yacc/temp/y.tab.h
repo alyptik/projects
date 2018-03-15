@@ -46,48 +46,16 @@ extern int yydebug;
   enum yytokentype
   {
     INTEGER = 258,
-    VARIABLE = 259,
-    WHILE = 260,
-    IF = 261,
-    PRINT = 262,
-    IFX = 263,
-    ELSE = 264,
-    GE = 265,
-    LE = 266,
-    EQ = 267,
-    NE = 268,
-    UMINUS = 269
+    VARIABLE = 259
   };
 #endif
 /* Tokens.  */
 #define INTEGER 258
 #define VARIABLE 259
-#define WHILE 260
-#define IF 261
-#define PRINT 262
-#define IFX 263
-#define ELSE 264
-#define GE 265
-#define LE 266
-#define EQ 267
-#define NE 268
-#define UMINUS 269
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
-
-union YYSTYPE
-{
-#line 19 "calc3.y" /* yacc.c:1909  */
-
-    int iValue;                 /* integer value */
-    char sIndex;                /* symbol table index */
-    nodeType *nPtr;             /* node pointer */
-
-#line 88 "y.tab.h" /* yacc.c:1909  */
-};
-
-typedef union YYSTYPE YYSTYPE;
+typedef int YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define YYSTYPE_IS_DECLARED 1
 #endif
