@@ -29,7 +29,7 @@ for word; do
 		LD_LIBRARY_PATH=/glibc/
 		export LIND_SRC REPY_PATH NACL_SDK_ROOT LIND_MONITOR PATH LD_LIBRARY_PATH
 		# remove -e flag after setting up environment
-		mapfile -td ' ' args < <(printf '%s' "${*//-e}")
+		mapfile -td ' ' args < <(printf '%s' "${*//-*e*}")
 		set -- "${args[@]}"
 		unset args
 	fi
@@ -75,10 +75,9 @@ readonly NACL_REPY_URL='https://github.com/Lind-Project/nacl_repy.git'
 readonly NACL_RUNTIME_URL='https://github.com/Lind-Project/native_client.git'
 
 readonly -a RSYNC=(rsync -avrc --force)
-readonly -a PYSED1=(grep -lPR '(^|'"'"'|"|[[:space:]]|/)(python)([[:space:]]|\.exe|$)' .)
-readonly -a PYSED2=(grep -vP '\.(git|.?html|cc?|h|exp|so\.old|so)\b')
-readonly -a PYSED3=(paste -sd ' ')
-readonly -a PYSED4=(sed -i.orig -r 's_(^|'"'"'|"|[[:space:]]|/)(python)([[:space:]]|\.exe|$)_\1\22\3_g')
+readonly -a PYGREPL=(grep -lPR '(^|'"'"'|"|[[:space:]]|/)(python)([[:space:]]|\.exe|$)' .)
+readonly -a PYGREPV=(grep -vP '\.(git|.?html|cc?|h|exp|so\.old|so)\b')
+readonly -a PYSED=(sed -i.orig -r 's_(^|'"'"'|"|[[:space:]]|/)(python)([[:space:]]|\.exe|$)_\1\22\3_g')
 
 if [[ "$NACL_SDK_ROOT" != "${REPY_PATH_SDK}" ]]; then
 	echo "You need to set \"$NACL_SDK_ROOT\" to \"${REPY_PATH_SDK}\""
@@ -86,37 +85,29 @@ if [[ "$NACL_SDK_ROOT" != "${REPY_PATH_SDK}" ]]; then
 fi
 
 function download_src {
-	local -a filelist
-
-	mkdir -p "${LIND_SRC}"
-	cd "${LIND_SRC}" && rm -rf "${LIND_SRC}/lind_glibc"
-
-	git clone "${LIND_GLIBC_URL}" lind_glibc
-	cd lind_glibc || exit 1
-	git checkout -b one_proc_model origin/one_proc_model
-	cd .. || exit 1
-
-	rm -rf "${LIND_SRC}/misc"
-	git clone "${LIND_MISC_URL}" misc
-
-	rm -rf "${LIND_SRC}/nacl_repy"
-	git clone "${NACL_REPY_URL}" nacl_repy
-
-	rm -rf "${LIND_SRC}/nacl"
-	mkdir -p "${NACL_SRC}"
+	# mkdir -p "${LIND_SRC}"
+	# cd "${LIND_SRC}" && rm -rf "${LIND_SRC:?}/lind_glibc"
+        #
+	# git clone "${LIND_GLIBC_URL}" lind_glibc
+	# cd lind_glibc || exit 1
+	# git checkout -b one_proc_model origin/one_proc_model
+	# cd .. || exit 1
+        #
+	# rm -rf "${LIND_SRC:?}/misc"
+	# git clone "${LIND_MISC_URL}" misc
+        #
+	# rm -rf "${LIND_SRC:?}/nacl_repy"
+	# git clone "${NACL_REPY_URL}" nacl_repy
+	#
+	# rm -rf "${LIND_SRC:?}/nacl"
+	# mkdir -p "${NACL_SRC}"
 	cd "${NACL_SRC}" || exit 1
-	git clone git@github.com:Lind-Project/native_client.git
-	cp "${LIND_SRC}/Makefile.native_client" "$NACL_TOOLCHAIN_BASE/Makefile"
-
-	# convert files from python to python2
-	mapfile -t filelist < <("${PYSED1[@]}" | "${PYSED2[@]}" | "${PYSED3[@]}")
-	for i in "${filelist[@]}"; do
-		"${PYSED4[@]}" "$i"
-		mv "$i.orig" "$i"
-	done
-
-	./gclient.py config --name=native_client https://github.com/Lind-Project/native_client.git@lind --git-deps
-	./gclient.py sync
+	# git clone git@github.com:Lind-Project/native_client.git
+	# cp "${LIND_SRC}/Makefile.native_client" "$NACL_TOOLCHAIN_BASE/Makefile"
+	#
+	# gclient config --name=native_client https://github.com/Lind-Project/native_client.git --git-deps
+	gclient config --name=native_client git@github.com:Lind-Project/native_client.git --git-deps
+	gclient sync
 	cd "${NACL_TOOLCHAIN_BASE}" && rm -rf SRC
 	make sync-pinned
 	cd SRC || exit 1
@@ -126,9 +117,18 @@ function download_src {
 
 	mkdir -p "${NACL_PORTS_DIR}"
 	cd "${NACL_PORTS_DIR}" || exit 1
-	./gclient.py config --name=src https://chromium.googlesource.com/webports/ --git-deps
-	# ./gclient.py config --name=src http://chromium.googlesource.com/native_client/nacl-gcc.git --git-deps
-	./gclient.py sync
+	# gclient config --name=src http://chromium.googlesource.com/native_client/nacl-gcc.git --git-deps
+	gclient config --name=src https://chromium.googlesource.com/webports/ --git-deps
+	gclient sync
+
+	# convert files from python to python2
+	cp "${LIND_SRC}/Makefile.native_client" "$NACL_TOOLCHAIN_BASE/Makefile"
+	cd "${NACL_SRC}/native_client" || exit 1
+	"${PYGREPL[@]}" | "${PYGREPV[@]}" | \
+		while read -r file; do
+			"${PYSED[@]}" "$file"
+			mv -v "$file.orig" "$file"
+		done
 
 	cd "${LIND_SRC}" || exit 1
 }
@@ -172,10 +172,10 @@ function install_to_path {
 
 	print "**Sending NaCl stuff to \"${REPY_PATH}\""
 
-	#echo "Deleting all directories in the "${REPY_PATH}" (except repy folder)"
-	#rm -rf "${REPY_PATH_BIN}"
-	#rm -rf "${REPY_PATH_LIB}"
-	#rm -rf "${REPY_PATH_SDK}"
+	# echo "Deleting all directories in the "${REPY_PATH}" (except repy folder)"
+	# rm -rf "${REPY_PATH_BIN:?}"
+	# rm -rf "${REPY_PATH_LIB:?}"
+	# rm -rf "${REPY_PATH_SDK:?}"
 
 	mkdir -p "${REPY_PATH_BIN}"
 	mkdir -p "${REPY_PATH_LIB}/glibc"
@@ -298,8 +298,8 @@ function nightly_build {
 }
 
 function clean_install {
-	rm -rf "$REPY_PATH"
-	mkdir -p "$REPY_PATH"
+	rm -rf "${REPY_PATH:?}"
+	mkdir -p "${REPY_PATH}"
 }
 
 
