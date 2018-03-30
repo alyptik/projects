@@ -5,20 +5,35 @@
 # Created by Chris Matthews <cmatthew@cs.uvic.ca>
 # Updated by Joey Pabalinas <joeypabalinas@gmail.com>
 
+# DEBUGGING SETTINGS:
+#
 # Uncomment this to print each command as they are executed
-# ≈set -o xtrace
-
+# set -o xtrace
 # Uncomment this for debugging. Will stop B on any failed commands
 # set -o errexit
-
 # Uncomment this to dump time profiling information out to a file to see where the script is slow
 # PS4='+ $(date "+%s.%N")\011 '
-# exec 3>&2 2> bashstart."$$".log
+# exec 2>bashstart."$$".log
 # set -x
 
-trap 'echo "All done."' EXIT
+# Call this instead of print, then we can do things like log and print
+# to notifier
+#
+function print() {
+	printf '%s\n' "$1"
+	# notify-send \
+	#         --icon=/usr/share/icons/gnome/256x256/apps/utilities-terminal.png \
+	#         "Build Script" \
+	#         "$1" \
+	#         >/dev/null 2>&1
+}
 
-# check for default environment flag
+trap 'print "All done."' EXIT
+
+# show arguments
+print "command line: $0 $*"
+
+# Check for default environment flag
 for word; do
 	if [[ "$word" == -*e* ]]; then
 		LIND_SRC="/usr/lind_project/lind"
@@ -29,19 +44,19 @@ for word; do
 		LD_LIBRARY_PATH=/glibc/
 		export LIND_SRC REPY_PATH NACL_SDK_ROOT LIND_MONITOR PATH LD_LIBRARY_PATH
 		# remove -e flag after setting up environment
-		mapfile -td ' ' args < <(printf '%s' "${*//-*e*}")
+		mapfile -td ' ' args < <(printf '%s' "${@//-*e*/}")
 		set -- "${args[@]}"
 		unset args
 	fi
 done
 
 if [[ -z "$REPY_PATH" ]]; then
-	echo "Need to set REPY_PATH"
+	print "Need to set REPY_PATH"
 	exit 1
 fi
 
 if [[ -z "$LIND_SRC" ]]; then
-	echo "Need to set LIND_SRC"
+	print "Need to set LIND_SRC"
 	exit 1
 fi
 
@@ -53,21 +68,28 @@ elif [[ "$OS_NAME" == "Linux" ]]; then
 else
 	readonly OS_SUBDIR="win"
 fi
-readonly MODE='dbg-'"${OS_SUBDIR}"
-readonly LIND_SRC="${LIND_SRC}"
-readonly MISC_DIR="${LIND_SRC}"/misc
-readonly NACL_SRC="${LIND_SRC}"/nacl
-readonly NACL_BASE="${NACL_SRC}"/native_client
-readonly NACL_TOOLCHAIN_BASE="${NACL_BASE}"/tools
-readonly LIND_GLIBC_SRC="${LIND_SRC}"/lind_glibc
-readonly NACL_REPY="${LIND_SRC}"/nacl_repy
-readonly NACL_PORTS_DIR="${LIND_SRC}"/naclports
+if type nproc >/dev/null 2>&1; then
+	readonly JOBS="$(nproc)"
+else
+	readonly JOBS='4'
+fi
+readonly MODE='dbg-'"$OS_SUBDIR"
+readonly LIND_SRC="$LIND_SRC"
+readonly MISC_DIR="$LIND_SRC/lind-misc"
+readonly NACL_SRC="$LIND_SRC/nacl"
+readonly NACL_BASE="$NACL_SRC/native_client"
+readonly NACL_THIRD_PARTY="$LIND_SRC/third_party"
+readonly NACL_TOOLCHAIN_BASE="$NACL_BASE/tools"
+readonly LIND_GLIBC_SRC="$LIND_SRC/lind_glibc"
+readonly NACL_REPY="$LIND_SRC/nacl_repy"
+readonly NACL_PORTS_DIR="$LIND_SRC/naclports"
+readonly NACL_GCC_DIR="$LIND_SRC/nacl-gcc"
 
-readonly REPY_PATH="${REPY_PATH}"
-readonly REPY_PATH_BIN="${REPY_PATH}"/bin
-readonly REPY_PATH_REPY="${REPY_PATH}"/repy
-readonly REPY_PATH_LIB="${REPY_PATH}"/lib
-readonly REPY_PATH_SDK="${REPY_PATH}"/sdk
+readonly REPY_PATH="$REPY_PATH"
+readonly REPY_PATH_BIN="$REPY_PATH/bin"
+readonly REPY_PATH_REPY="$REPY_PATH/repy"
+readonly REPY_PATH_LIB="$REPY_PATH/lib"
+readonly REPY_PATH_SDK="$REPY_PATH/sdk"
 
 readonly LIND_GLIBC_URL='https://github.com/Lind-Project/Lind-GlibC.git'
 readonly LIND_MISC_URL='https://github.com/Lind-Project/Lind-misc.git'
@@ -77,102 +99,111 @@ readonly NACL_RUNTIME_URL='https://github.com/Lind-Project/native_client.git'
 readonly -a RSYNC=(rsync -avrc --force)
 readonly -a PYGREPL=(grep -lPR '(^|'"'"'|"|[[:space:]]|/)(python)([[:space:]]|\.exe|$)' .)
 readonly -a PYGREPV=(grep -vP '\.(git|.?html|cc?|h|exp|so\.old|so)\b')
-readonly -a PYSED=(sed -i.orig -r 's_(^|'"'"'|"|[[:space:]]|/)(python)([[:space:]]|\.exe|$)_\1\22\3_g')
+readonly -a PYSED=(sed -r 's_(^|'"'"'|"|[[:space:]]|/)(python)([[:space:]]|\.exe|$)_\1\22\3_g')
 
 if [[ "$NACL_SDK_ROOT" != "${REPY_PATH_SDK}" ]]; then
-	echo "You need to set \"$NACL_SDK_ROOT\" to \"${REPY_PATH_SDK}\""
+	print "You need to set \"$NACL_SDK_ROOT\" to \"${REPY_PATH_SDK}\""
 	exit 1
 fi
 
-function download_src {
-	# mkdir -p "${LIND_SRC}"
+# Download source files
+#
+function download_src() {
+	# mkdir -p "$LIND_SRC"
 	# cd "${LIND_SRC}" && rm -rf "${LIND_SRC:?}/lind_glibc"
-        #
-	# git clone "${LIND_GLIBC_URL}" lind_glibc
+	#
+	# git clone "$LIND_GLIBC_URL" lind_glibc
 	# cd lind_glibc || exit 1
 	# git checkout -b one_proc_model origin/one_proc_model
 	# cd .. || exit 1
-        #
+	#
 	# rm -rf "${LIND_SRC:?}/misc"
-	# git clone "${LIND_MISC_URL}" misc
-        #
+	# git clone "$LIND_MISC_URL" misc
+	#
 	# rm -rf "${LIND_SRC:?}/nacl_repy"
-	# git clone "${NACL_REPY_URL}" nacl_repy
+	# git clone "$NACL_REPY_URL" nacl_repy
 	#
 	# rm -rf "${LIND_SRC:?}/nacl"
-	# mkdir -p "${NACL_SRC}"
-	cd "${NACL_SRC}" || exit 1
+	# mkdir -p "$NACL_SRC"
+
+	mkdir -p "$NACL_BASE"
+	cd "$NACL_BASE" || exit 1
 	# git clone git@github.com:Lind-Project/native_client.git
-	# cp "${LIND_SRC}/Makefile.native_client" "$NACL_TOOLCHAIN_BASE/Makefile"
-	#
-	# gclient config --name=native_client https://github.com/Lind-Project/native_client.git --git-deps
 	gclient config --name=native_client git@github.com:Lind-Project/native_client.git --git-deps
 	gclient sync
-	cd "${NACL_TOOLCHAIN_BASE}" && rm -rf SRC
-	make sync-pinned
-	cd SRC || exit 1
-	mv glibc glibc_orig
-	ln -s "${LIND_GLIBC_SRC}" glibc
-	cd .. || exit 1
 
-	mkdir -p "${NACL_PORTS_DIR}"
-	cd "${NACL_PORTS_DIR}" || exit 1
-	# gclient config --name=src http://chromium.googlesource.com/native_client/nacl-gcc.git --git-deps
+
+	mkdir -p "$NACL_PORTS_DIR"
+	cd "$NACL_PORTS_DIR" || exit 1
 	gclient config --name=src https://chromium.googlesource.com/webports/ --git-deps
 	gclient sync
 
+	mkdir -p "$NACL_GCC_DIR"
+	cd "$NACL_GCC_DIR" || exit 1
+	gclient config --name=src http://chromium.googlesource.com/native_client/nacl-gcc.git --git-deps
+	gclient sync
+
+	# use custom repos as bases
+	cd "$NACL_TOOLCHAIN_BASE" && rm -rf SRC
+	make sync-pinned
+	cd SRC || exit 1
+	mv glibc glibc_orig
+	ln -s "$LIND_GLIBC_SRC" glibc
+	mv gcc gcc_orig
+	ln -s "$NACL_GCC_DIR" gcc
+	cd .. || exit 1
+
+	# apply toolchain patches
+	cd "$NACL_BASE" || exit 1
+	git apply -v "$LIND_SRC/native_client.patch"
+	cd "$NACL_GCC_DIR" || exit 1
+	git apply -v "$LIND_SRC/gcc.patch"
+	cd "$LIND_GLIBC_SRC" || exit 1
+	git apply -v "$LIND_SRC/glibc.patch"
+
 	# convert files from python to python2
-	cp "${LIND_SRC}/Makefile.native_client" "$NACL_TOOLCHAIN_BASE/Makefile"
-	cd "${NACL_SRC}/native_client" || exit 1
-	"${PYGREPL[@]}" | "${PYGREPV[@]}" | \
+	"${PYGREPL[@]}" 2>/dev/null | \
+		"${PYGREPV[@]}" | \
 		while read -r file; do
-			"${PYSED[@]}" "$file"
-			mv -v "$file.orig" "$file"
+			# preserve executability
+			"${PYSED[@]}" "$file" > "$file.new"
+			cat <"$file.new" >"$file"
+			rm "$file.new"
 		done
 
-	cd "${LIND_SRC}" || exit 1
-}
-
-#call this instead of echo, then we can do things like log and print to notifier
-#
-#
-function print {
-	echo "$1"
-	# notify-send --icon=/usr/share/icons/gnome/256x256/apps/utilities-terminal.png "Build Script" "$1" >& /dev/null
+	cd "$LIND_SRC" || exit 1
 }
 
 
-# wipe the entire modular build toolchain build tree, then rebuild it
+# Wipe the entire modular build toolchain build tree, then rebuild it
 # Warning: this can take a while!
 #
-function clean_toolchain {
+function clean_toolchain() {
 	cd "${NACL_TOOLCHAIN_BASE}" && rm -rf out BUILD
 }
 
 
 # Compile liblind and the compoent programs.
 #
-#
-function build_liblind {
-	echo -ne "Building liblind... "
+function build_liblind() {
+	print -ne "Building liblind... "
 	cd "${MISC_DIR}"/liblind && make clean all > /dev/null
-	echo "done."
+	print "done."
 
 }
 
 
 # Copy the toolchain files into the repy subdir.
 #
-#
-function install_to_path {
+function install_to_path() {
 	# nothing should fail here.
 	set -o errexit
 
-	echo "Injecting Libs into RePy install"
+	print "Injecting Libs into RePy install"
 
 	print "**Sending NaCl stuff to \"${REPY_PATH}\""
 
-	# echo "Deleting all directories in the "${REPY_PATH}" (except repy folder)"
+	# print "Deleting all directories in the "${REPY_PATH}" (except repy folder)"
 	# rm -rf "${REPY_PATH_BIN:?}"
 	# rm -rf "${REPY_PATH_LIB:?}"
 	# rm -rf "${REPY_PATH_SDK:?}"
@@ -182,57 +213,54 @@ function install_to_path {
 	mkdir -p "${REPY_PATH_SDK}/toolchain/${OS_SUBDIR}_x86_glibc"
 	mkdir -p "${REPY_PATH_SDK}/tools"
 
-	"${RSYNC[@]}" "${NACL_TOOLCHAIN_BASE}/out/nacl-sdk/"* "${REPY_PATH_SDK}/toolchain/${OS_SUBDIR}_x86_glibc"
-	#we need some files from the original sdk to help compile some applications (e.g. zlib)
-	#${RSYNC} ${MISC_DIR}/"${OS_SUBDIR}_pepper_28_tools"/* "${REPY_PATH_SDK}"/tools
+	"${RSYNC[@]}" "${NACL_TOOLCHAIN_BASE:?}/out/nacl-sdk/"* "${REPY_PATH_SDK:?}/toolchain/${OS_SUBDIR:?}_x86_glibc"
+	# we need some files from the original sdk to help compile some applications (e.g. zlib)
+	# "${RSYNC[@]}" "${MISC_DIR:?}/${OS_SUBDIR:?}_pepper_28_tools/"* "${REPY_PATH_SDK:?}/tools"
 
-	"${RSYNC[@]}" "${NACL_BASE}/scons-out/${MODE}-x86-64/staging/"* "${REPY_PATH_BIN}"
+	"${RSYNC[@]}" "${NACL_BASE:?}/scons-out/${MODE:?}-x86-64/staging/"* "${REPY_PATH_BIN:?}"
 
 	#install script
-	cp -f "${MISC_DIR}"/lind.sh "${REPY_PATH_BIN}"/lind
+	cp -f "${MISC_DIR:?}/lind.sh" "${REPY_PATH_BIN:?}/lind"
 	chmod +x "${REPY_PATH_BIN}"/lind
 
-	"${RSYNC[@]}" "${NACL_TOOLCHAIN_BASE}/out/nacl-sdk/x86_64-nacl/lib/"*  "${REPY_PATH_LIB}/glibc"
+	"${RSYNC[@]}" "${NACL_TOOLCHAIN_BASE:?}/out/nacl-sdk/x86_64-nacl/lib/"*  "${REPY_PATH_LIB:?}/glibc"
 }
 
 
 # Run the RePy unit tests.
 #
-#
-function test_repy {
+function test_repy() {
 	cd "$REPY_PATH/repy/" || exit 1
 	# some of our unit tests fail
 	set +o errexit
 	for file in ut_lind_*; do
-		echo "$file"
-		# trap 'python2 "${REPY_PATH}"/repy/repy.py --safebinary \
-		#         "${REPY_PATH}"/repy/restrictions.lind "${REPY_PATH}"/repy/lind_server.py "$@"' INT TERM EXIT
-		trap ';' TERM
+		print "$file"
+		# trap 'python2 "$REPY_PATH"/repy/repy.py --safebinary \
+		#         "$REPY_PATH"/repy/restrictions.lind "${REPY_PATH}"/repy/lind_server.py "$@"' INT TERM EXIT
+		# trap ';' TERM
 		python2 "$file"
 		# trap 'python2 "$file"' INT TERM EXIT
 	done
 
 	# run the struct test
 	file=ut_seattlelibtests_teststruct.py
-	echo "$file"
+	print "$file"
 	python2 "$file"
-
 }
 
 
 # Run the applications test stuites.
 #
-#
-function test_apps {
+function test_apps() {
 	set +o errexit
-	cd "${MISC_DIR}/tests" || exit 1
+	cd "$MISC_DIR/tests" || exit 1
 	./test.sh
 }
 
+
 # Check the REPY_PATH location to make sure it is safe to be installing stuff there.
 #
-#
-function check_install_dir {
+function check_install_dir() {
 
 	# and if it does not exit, make it.
 	if [[ ! -d "$REPY_PATH" ]]; then
@@ -244,21 +272,18 @@ function check_install_dir {
 
 # Install repy into "$REPY_PATH" with the prepare_tests script.
 #
-#
-function build_repy {
-
-	set -o errexit
-
+function build_repy() {
+	# set -o errexit
 	mkdir -p "${REPY_PATH_REPY}"
 
-	print "Building Repy in \"$REPY_SRC\" to \"$REPY_PATH\""
-	cd "${NACL_REPY}" || exit 1
+	print "Building Repy in \"$NACL_REPY\" to \"$REPY_PATH\""
+	cd "$NACL_REPY" || exit 1
 	python2 preparetest.py -t -f "${REPY_PATH_REPY}"
 	print "Done building Repy in \"${REPY_PATH_REPY}\""
 	cd seattlelib || exit 1
-	set -o errexit
+	# set -o errexit
 	for file in *.mix; do
-		"${MISC_DIR}"/check_includes.sh "$file"
+		"$MISC_DIR/check_includes.sh" "$file"
 	done
 	set +o errexit
 	# etags  --language-force=python *.mix *.repy
@@ -267,8 +292,7 @@ function build_repy {
 
 # Update, build and test everything. If there is a problem, freak out.
 #
-#
-function nightly_build {
+function nightly_build() {
 	set -o errexit
 	# Clean
 	# clean_install
@@ -297,7 +321,10 @@ function nightly_build {
 
 }
 
-function clean_install {
+
+# Clean install path
+#
+function clean_install() {
 	rm -rf "${REPY_PATH:?}"
 	mkdir -p "${REPY_PATH}"
 }
@@ -305,8 +332,7 @@ function clean_install {
 
 # Run the NaCl build.
 #
-#
-function build_nacl {
+function build_nacl() {
 	print "Building NaCl"
 	cd "${NACL_BASE}" || exit 1
 
@@ -316,7 +342,7 @@ function build_nacl {
 	rc=$?
 	if [[ "$rc" -ne "0" ]]; then
 		print "NaCl Build Failed(\"$rc\")"
-		echo $'\a'
+		print $'\a'
 		exit "$rc"
 	fi
 
@@ -326,8 +352,7 @@ function build_nacl {
 
 # Run clean on nacl build.
 #
-#
-function clean_nacl {
+function clean_nacl() {
 	cd "${NACL_BASE}"
 	./scons --mode="${MODE}",nacl platform=x86-64 --nacl_glibc -c
 	print "Done Cleaning NaCl"
@@ -336,73 +361,83 @@ function clean_nacl {
 
 # Build glibc from source
 #
-#
-function build_glibc {
-	# the build is long and borning, so execute this first if it exists
-	type -P fortune &>/dev/null && fortune || echo "Fortune Not Found. Skipping."
+function build_glibc() {
+	# the build is long and boring, so execute this first if it exists
+	if type -P fortune &>/dev/null; then
+		fortune
+	else
+		print "Fortune Not Found. Skipping."
+	fi
 
-	echo -ne "Copy component.h header to glibc: "
-	cd "${MISC_DIR}"/liblind
-	cp -fvp component.h "${LIND_GLIBC_SRC}"/sysdeps/nacl/
-	echo "done."
+	print -ne "Copy component.h header to glibc: "
+	cd "$MISC_DIR/liblind" || exit 1
+	rm -fv "$NACL_SRC/third_party"
+	cp -fvp component.h "$LIND_GLIBC_SRC/sysdeps/nacl/"
+	ln -rsv "$NACL_THIRD_PARTY" "$NACL_SRC/"
+	print "done."
 
-	echo "Building glibc"
+	print "Building glibc"
 
 	# if extra files (like editor temp files) are in the subdir glibc tries to compile them too.
 	# move them here so they dont cause a problem
-	cd "${LIND_GLIBC_SRC}"/sysdeps/nacl/
+	cd "$LIND_GLIBC_SRC/sysdeps/nacl/" || exit 1
 	shopt -s nullglob
 	for f in .\#*; do
-		print "moving editor backupfile \"${f}\" so it does not get caught in build."
-		mv -f "${f}" .
+		print "moving editor backupfile \"$f\" so it does not get caught in build."
+		mv -f "$f" .
 	done
 
 	# turns out this works better if you do it from the nacl base dir
-	cd "${NACL_TOOLCHAIN_BASE}" && rm -fr BUILD out
-	cp "${LIND_SRC}/Makefile.native_client" "$NACL_TOOLCHAIN_BASE/Makefile"
-	make clean build-with-glibc -j4 || exit -1
-
+	cd "$NACL_TOOLCHAIN_BASE" && rm -fr BUILD out
+	make -j"$JOBS" clean build-with-glibc || exit -1
 	print "Done building toolchain"
 }
 
-function update_glibc {
-	cd "${NACL_TOOLCHAIN_BASE}" && make updateglibc
+
+# Update glibc toolchain
+#
+function update_glibc() {
+	cd "$NACL_TOOLCHAIN_BASE" && make updateglibc
 }
 
-function update_glibc2 {
-	cd "${NACL_TOOLCHAIN_BASE}" && rm BUILD/stamp-glibc64
+
+# Update glibc 64bit toolchain
+#
+function update_glibc2() {
+	cd "$NACL_TOOLCHAIN_BASE" && rm BUILD/stamp-glibc64
 	make BUILD/stamp-glibc64
 }
 
+
 # Run the glibc tester
 #
-#
-function glibc_tester {
+function glibc_tester() {
 	set -o errexit
 
-	cd "${MISC_DIR}"/glibc_test/
+	cd "$MISC_DIR/glibc_test/" || exit 1
 	make clean all
-	cd ..
+	cd .. || exit 1
 	rm -rfv lind.metadata linddata.*
-	lind "${MISC_DIR}"/glibc_test/glibc_tester.nexe
+	lind "$MISC_DIR/glibc_test/glibc_tester.nexe"
 }
 
-PS3="build what: "
-list=(all repy nacl buildglibc updateglibc updateglibc2 cleantoolchain download cleannacl install liblind test_repy test_glibc test_apps sdk rpc test nightly)
-word=""
-if [[ -z "$*" ]]; then
+PS3='build what: '
+list+=(all repy nacl buildglibc updateglibc updateglibc2 cleantoolchain)
+list+=(download cleannacl install liblind test_repy test_glibc test_apps)
+list+=(sdk rpc test nightly)
+
+if (($#)); then
+	args=("$@")
+else
 	select choice in "${list[@]}"; do
 		args=("$choice")
 		break
 	done
-else
-	args=("$@")
 fi
 
 START_TIME=$(date +%s)
 
-# all scripts assume we start here
-echo "${args[0]}" "${args[1]}"
+# All scripts assume we start here
 ELEMENTS="${#args[@]}"
 for ((i = 0; i < ELEMENTS; i++)); do
 	word="${args[${i}]}"
@@ -454,12 +489,12 @@ for ((i = 0; i < ELEMENTS; i++)); do
 		print "Nightly Build"
 		nightly_build
 	else
-		echo "Error: Did not find a build target named \"$word\". Exiting..."
+		print "Error: Did not find a build target named \"$word\". Exiting..."
 		exit 1
 	fi
 done
 
 END_TIME=$(date +%s)
 DIFF=$(( END_TIME - START_TIME ))
-echo "It took \"$DIFF\" seconds"
-echo $'\a'
+print "It took \"$DIFF\" seconds"
+print $'\a'
