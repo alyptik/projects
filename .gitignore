@@ -18,8 +18,3 @@ a.out
 *cscope.*
 tags
 TAGS
-!/secure-systems-lab/
-!/secure-systems-lab/lind_project/
-!/secure-systems-lab/lind_project/lind/
-!/lind_project/lind/build.sh
-!/lind_project/lind/Makefile.native_client
