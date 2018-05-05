@@ -1,21 +1,21 @@
 #!/bin/bash
 
-old_commit_msg="$(cat "${1}")"
-echo -n "" > "${1}"
+old_commit_msg="$(<"$1")"
+echo -n "" > "$1"
 
 # added
 for path in $(git diff --name-only --cached --diff-filter=A); do
-	echo "${path##*/}:" >> "${1}"
+	echo "${path%/*}:" >> "$1"
 done
 
 # modified
 for path in $(git diff --name-only --cached --diff-filter=M); do
-	echo "${path##*/}:" >> "${1}"
+	echo "${path%/*}:" >> "$1"
 done
 
 # deleted
 for path in $(git diff --name-only --cached --diff-filter=D); do
-	echo "${path##*/}:" >> "${1}"
+	echo "${path%/*}:" >> "$1"
 done
 
-echo "${old_commit_msg}" >> "${1}"
+echo "$old_commit_msg" >> "$1"
