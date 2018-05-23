@@ -1,6 +1,11 @@
 #!/bin/bash
 
 old_commit_msg="$(<"$1")"
+
+if [ -n "$(sed -n -e '1 s/[[:space:]]*//p' "$1")" ]; then
+	exit
+fi
+
 echo -n "" > "$1"
 
 # added
