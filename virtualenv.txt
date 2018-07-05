@@ -1,0 +1,9 @@
+13:08 <nh> k best method here is unactivate and just delete the entire venv
+13:08 <nh> start over
+13:08 <nh> 1. go to parent dir you want boat folder in and run `python -m venv <boatdirname>`
+13:08 <nh> 2. `pip install {limnoria,cobe,chardet}`
+13:09 <nh> 3. replace <boatdirname>/lib/python3.6/site-packages/cobe with first tar.gz
+13:09 <nh> 4. unzip second tar.gz to <boatdirname>/boatname/plugins/Cobe
+13:10 <nh> actually 1b needs to be `source <boatdirname>/bin/activate`
+13:10 <nh> do it before pip
+13:10 <nh> and don't use `--user` for anything
