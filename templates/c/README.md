@@ -1,19 +1,19 @@
-# <template> - <template>
+# template - template
 
-<template>
+template
 
 ## Dependencies
 
-* <template>
+* template
 > **Optional:**
-> * <template>
+ * template
 
 ## Usage
 ```bash
-./<template> [-hv] [-o<output.c>]
+./template [-hv] [-o output.c]
 ```
 
-Run `make` then `./<template>`.
+Run `make` then `./template`.
 
 #### <template> options
 

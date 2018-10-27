@@ -1,13 +1,21 @@
+cscope.out
+cscope.in.out
+cscope.po.out
 tags
 TAGS
 *.swp
 vgcore*
 
 # Binaries
-cepl
+<template>
 t/*
 !t/*.c
 !t/*.h
+*.out
+
+# Profiling
+*.gcda
+*.gcno
 
 # Object files
 *.o
@@ -33,6 +41,7 @@ t/*
 *.dylib
 
 # Executables
+*.old
 *.exe
 *.out
 *.app
@@ -43,6 +52,13 @@ t/*
 # Debug files
 *.dSYM/
 *.su
-.cepl_history
 *.tar.gz
-debug.mk
+asan.mk
+
+# static libraries
+/vendor/*/
+!/vendor/lib/
+!/vendor/lib/*.a
+!/vendor/include/
+
+# vi:ft=cfg:

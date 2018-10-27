@@ -1,13 +1,16 @@
-# config.mk - Makefile configuration variables
 #
-# AUTHOR: Joey Pabalinas <alyptik@protonmail.com>
-# See LICENSE.md file for copyright and license details.
+# SPDX-License-Identifier: MIT
+#
+# Copyright (c) 2018 Joey Pabalinas <joeypabalinas@gmail.com>
+
+# add -Wrestrict if using gcc7 or higher
+RESTRICT := $(shell gcc -v 2>&1 | awk '/version/ { if (substr($$3, 1, 1) > 6) { print "-Wrestrict"; } }')
 
 # optional
 DESTDIR ?=
 PREFIX ?= /usr/local
 CC ?= gcc
-OLVL ?= -O2
+OLVL ?= -O3
 
 # mandatory
 LD = $(CC)
@@ -17,31 +20,45 @@ MKALL = $(MKCFG) $(DEP)
 OBJ = $(SRC:.c=.o)
 TOBJ = $(TSRC:.c=.o)
 DEP = $(SRC:.c=.d) $(TSRC:.c=.d)
-TEST = $(filter-out $(TAP),$(TSRC:.c=))
+TEST = $(TSRC:.c=)
 UTEST = $(filter-out src/$(TARGET).o,$(SRC:.c=.o))
 SRC := $(wildcard src/*.c)
 TSRC := $(wildcard t/*.c)
 HDR := $(wildcard src/*.h) $(wildcard t/*.h)
-DEBUG := $(shell gcc -v 2>&1 | awk '/version/ { if (substr($$3, 1, 1) == 7) { print "-Wrestrict" } }')
 ASAN := -fsanitize=address,alignment,leak,undefined
 CPPFLAGS := -D_FORTIFY_SOURCE=2 -D_GNU_SOURCE -MMD -MP
-LIBS := -lelf -lhistory -lreadline
-TARGET := template
-MANPAGE := template.1
-COMPLETION := _template
-TAP := t/tap
+VENDOR := vendor
+CONTRIB := contrib
 BINDIR := bin
 MANDIR := share/man/man1
 COMPDIR := share/zsh/site-functions
+LIBS :=
+TARGET := template
+MANPAGE := template.1
+COMPLETION := _template
+TAP := $(CONTRIB)/libtap
+WARNINGS := $(RESTRICT) -Wall -Wextra -pedantic				\
+		-Wcast-align -Wfloat-equal -Wmissing-declarations	\
+		-Wmissing-prototypes -Wnested-externs -Wpointer-arith	\
+		-Wshadow -Wstrict-overflow
+IGNORES := -Wno-conversion -Wno-cpp -Wno-discarded-qualifiers		\
+		-Wno-implicit-fallthrough -Wno-inline -Wno-long-long	\
+		-Wno-missing-field-initializers -Wno-redundant-decls	\
+		-Wno-sign-conversion -Wno-strict-prototypes		\
+		-Wno-unused-variable -Wno-write-strings
+LDLIBS += -D_GNU_SOURCE -D_DEFAULT_SOURCE
+LDLIBS += -lreadline -lhistory -lelf
+LDLIBS += $(shell pkg-config ncursesw --cflags --libs || pkg-config ncurses --cflags --libs)
 MKALL += Makefile asan.mk
-DEBUG += -Wshadow -Wfloat-equal
-DEBUG += -Og -ggdb3 -no-pie -D_DEBUG
-DEBUG += -fno-inline -fno-builtin -fno-common -fverbose-asm
-CFLAGS += -std=c11 -pedantic -errors-Wall -Wextra
-CFLAGS += -Wstrict-overflow -Wno-unused-variable
-CFLAGS += -Wno-implicit-fallthrough -Wno-missing-field-initializers
-CFLAGS += -fPIC -fuse-ld=gold -flto -fuse-linker-plugin -fno-strict-aliasing
-LDFLAGS += -Wl,-O2,-z,relro,-z,now,--sort-common,--as-needed
-LDFLAGS += -fPIC -fuse-ld=gold -flto -fuse-linker-plugin -fno-strict-aliasing
+DEBUG += -O1 -no-pie -D_DEBUG
+DEBUG += -fno-builtin -fno-inline
+DEBUG += -I$(TAP)
+CFLAGS += -g3 -std=c11 -fPIC
+CFLAGS += -fstack-protector-strong
+CFLAGS += -fuse-ld=gold -fuse-linker-plugin
+CFLAGS += -fno-common -fno-strict-aliasing
+CFLAGS += $(WARNINGS) $(IGNORES) -I$(TAP)
+LDFLAGS += -Wl,-O3,-z,relro,-z,now,-z,noexecstack
+LDFLAGS += $(filter-out $(WARNINGS),$(CFLAGS))
 
 # vi:ft=make:

@@ -1,65 +1,80 @@
 /*
- * defs.h - data structure and macro definitions
+ * SPDX-License-Identifier: MIT
  *
- * AUTHOR: Joey Pabalinas <alyptik@protonmail.com>
- * See LICENSE.md file for copyright and license details.
+ * Copyright (c) 2018 Joey Pabalinas <joeypabalinas@gmail.com>
  */
 
-#ifndef DEFS_H
+#if !defined(DEFS_H)
 #define DEFS_H 1
+
+/* silence linter */
+#undef _GNU_SOURCE
+#define _GNU_SOURCE
 
 #include "errs.h"
 #include <ctype.h>
 #include <limits.h>
+#include <signal.h>
 #include <stdbool.h>
 #include <stdint.h>
+#include <termio.h>
 #include <unistd.h>
 
 /* macros */
+/* macros */
 #define DEFAULT(ARG, ALT)	((ARG) ? (ARG) : (ALT))
-#define ARRLEN(ARR)		((sizeof (ARR)) / (sizeof (ARR)[0]))
+#define MIN(A, B)		(((A) < (B)) ? (A) : (B))
+#define MAX(A, B)		(((A) > (B)) ? (A) : (B))
+#define ARR_LEN(ARR)		((sizeof (ARR)) / (sizeof *(ARR)))
+#define FOR_EACH_IN(LIST)	for (size_t i = 0; i < (LIST).cnt; i++)
+#define DPRINTF(FMT, ...)	fprintf(stderr, "\033[92m" FMT "\033[00m", __VA_ARGS__)
+/* `malloc()` wrapper */
+#define xmalloc(TYPE, PTR, SZ, MSG) \
+	do { \
+		void *tmp = malloc(SZ); \
+		if (!tmp) \
+			ERR("%s", (MSG)); \
+		*(TYPE **)PTR = tmp; \
+	} while (0)
+/* `calloc()` wrapper */
+#define xcalloc(TYPE, PTR, NMEMB, SZ, MSG) \
+	do { \
+		void *tmp = calloc((NMEMB), (SZ)); \
+		if (!tmp) \
+			ERR("%s", (MSG)); \
+		*(TYPE **)PTR = tmp; \
+	} while (0)
+/* `realloc()` wrapper */
+#define xrealloc(TYPE, PTR, SZ, MSG) \
+	do { \
+		void *tmp[2] = {0, *(TYPE **)PTR}; \
+		if (!(tmp[0] = realloc(tmp[1], SZ))) \
+			ERR("%s", (MSG)); \
+		*(TYPE **)PTR = tmp[0]; \
+	} while (0)
 
 /* global version and usage strings */
-#define VERSION_STRING	"CEPL v5.3.0"
-#define USAGE_STRING	"[-hptvw] [(-a|-i)“<asm.s>”] [-c“<compiler>”] [-e“<code>”] " \
-	"[-l“<libs>”] [-I“<includes>”] [-o“<out.c>”]\n\t" \
-	"-a,--att:\t\tName of the file to output AT&T-dialect assembler code to\n\t" \
-	"-c,--cc:\t\tSpecify alternate compiler\n\t" \
-	"-e,--eval:\t\tEvaluate the following argument as C code\n\t" \
-	"-f,--file:\t\tName of file to use as starting C code template\n\t" \
+#define VERSION_STRING	"template v0.1.1"
+#define USAGE_STRING	"[-hptvw] " \
 	"-h,--help:\t\tShow help/usage information\n\t" \
-	"-i,--intel:\t\tName of the file to output Intel-dialect assembler code to\n\t" \
-	"-o,--output:\t\tName of the file to output C source code to\n\t" \
-	"-p,--parse:\t\tDisable addition of dynamic library symbols to readline completion\n\t" \
-	"-t,--tracking:\t\tToggle variable tracking\n\t" \
-	"-v,--version:\t\tShow version information\n\t" \
-	"-w,--warnings:\t\tCompile with ”-pedantic -Wall -Wextra” flags\n\t" \
-	"-l:\t\t\tLink against specified library (flag can be repeated)\n\t" \
-	"-I:\t\t\tSearch directory for header files (flag can be repeated)\n" \
-	"Input lines prefixed with a “;” are used to control internal state\n\t" \
-	";a[tt]:\t\t\tToggle -a (output AT&T-dialect assembler code) flag\n\t" \
-	";h[elp]:\t\tShow help\n\t" \
-	";i[ntel]:\t\tToggle -a (output Intel-dialect assembler code) flag\n\t" \
-	";m[acro]:\t\tDefine a function (e.g. “;f void bork(void) { puts(\"wark\"); }”)\n\t" \
-	";o[utput]:\t\tToggle -o (output C source code) flag\n\t" \
-	";p[arse]:\t\tToggle -p (shared library parsing) flag\n\t" \
-	";q[uit]:\t\tExit CEPL\n\t" \
-	";r[eset]:\t\tReset CEPL to its initial program state\n\t" \
-	";t[racking]:\t\tToggle variable tracking\n\t" \
-	";u[ndo]:\t\tIncremental pop_history (can be repeated)\n\t" \
-	";w[arnings]:\t\tToggle -w (pedantic warnings) flag"
+	"-v,--version:\t\tShow version information"
+/* option default initializer */
+#define STATE_FLAG_DEF_INIT \
+	(struct state_flags){ \
+		.asm_flag = false, .eval_flag = false, .exec_flag = false, \
+		.in_flag = false, .out_flag = false, .parse_flag = true, \
+		.track_flag = true, .warn_flag = false, .hist_flag = false, \
+	}
 #define	RED		"\\033[31m"
 #define	GREEN		"\\033[32m"
 #define	YELLOW		"\\033[33m"
+#define	PURPLE		"\\033[35m"
+#define	CYAN		"\\033[36m"
 #define	RST		"\\033[00m"
-/* page size for buffer count */
-#define PAGE_SIZE	sysconf(_SC_PAGESIZE)
-/* max possible types */
-#define TNUM		7
+/* system page size assumption */
+#define PAGE_SIZE	4096
 /* max eval string length */
-#define EVAL_LIMIT	4096
-/* `strmv() `concat constant */
-#define CONCAT		(-1)
+#define EVAL_LIMIT	PAGE_SIZE
 
 /* enumerations */
 enum src_flag {
@@ -68,7 +83,7 @@ enum src_flag {
 
 /* input src state */
 enum scan_state {
-	IN_PRELUDE, IN_MIDDLE, IN_EPILOGUE,
+	IN_PROLOGUE, IN_MIDDLE, IN_EPILOGUE,
 };
 
 /* asm dialect */
@@ -79,76 +94,104 @@ enum asm_type {
 /* possible types of tracked variable */
 enum var_type {
 	T_ERR, T_CHR, T_STR,
-	T_INT, T_UINT, T_DBL,
+	T_INT, T_UINT, T_FLT,
 	T_PTR, T_OTHER,
 };
 
 /* struct definition for NULL-terminated string dynamic array */
-typedef struct _str_list {
+struct str_list {
 	size_t cnt, max;
 	char **list;
-} STR_LIST;
+};
 
 /* struct definition for flag dynamic array */
-typedef struct _flag_list {
+struct flag_list {
 	size_t cnt, max;
 	enum src_flag *list;
-} FLAG_LIST;
+};
 
 /* struct definition for type dynamic array */
-typedef struct _type_list {
+struct type_list {
 	size_t cnt, max;
 	enum var_type *list;
-} TYPE_LIST;
+};
 
 /* struct definition for var-tracking array */
-typedef struct _var_list {
+struct var_list {
 	size_t cnt, max;
 	struct {
 		char *id;
 		enum var_type type_spec;
 	} *list;
-} VAR_LIST;
+};
+
+/* struct definition for program source sections */
+struct source_section {
+	size_t size, max;
+	char *buf;
+};
 
 /* struct definition for generated program sources */
-typedef struct _prog_src {
-	size_t b_sz, f_sz, t_sz;
-	size_t b_max, f_max, t_max;
-	char *b, *f, *total;
-	STR_LIST hist, lines;
-	FLAG_LIST flags;
-} PROG_SRC;
+struct source_code {
+	struct source_section body, funcs, total;
+	struct str_list hist, lines;
+	struct flag_list flags;
+};
 
-/* `malloc()` wrapper */
-static inline void xmalloc(void *restrict ptr, size_t sz, char const *msg)
-{
-	/* sanity check */
-	if (!ptr)
-		return;
-	if (!(*(void **)ptr = malloc(sz)))
-		ERR("%s", msg ? msg : "(nil)");
-}
+/* struct definition for state flags */
+struct state_flags {
+	bool asm_flag, eval_flag;
+	bool exec_flag, parse_flag;
+	bool track_flag, warn_flag;
+	bool in_flag, out_flag, hist_flag;
+};
 
-/* `calloc()` wrapper */
-static inline void xcalloc(void *restrict ptr, size_t nmemb, size_t sz, char const *msg)
-{
-	/* sanity check */
-	if (!ptr)
-		return;
-	if (!(*(void **)ptr = calloc(nmemb, sz)))
-		ERR("%s", msg ? msg : "(nil)");
-}
+/* standard io stream state state */
+struct termio_state {
+	bool modes_changed;
+	struct termio save_modes[4];
+};
 
-/* `realloc()` wrapper */
-static inline void xrealloc(void *restrict ptr, size_t sz, char const *msg)
+/* monolithic program structure */
+struct program {
+	FILE *ofile;
+	int saved_fd;
+	char *input_src[3], eval_arg[EVAL_LIMIT];
+	char *cur_line, *hist_file;
+	char *out_filename, *asm_filename;
+	struct str_list cc_list, ld_list;
+	struct str_list lib_list, sym_list;
+	struct str_list id_list;
+	struct type_list type_list;
+	struct var_list var_list;
+	struct source_code src[2];
+	struct state_flags sflags;
+	struct termio_state tty_state;
+};
+
+/* reset signal handlers before fork */
+static inline void reset_handlers(void)
 {
-	void *tmp;
-	/* sanity check */
-	if (!ptr)
-		return;
-	if (!(tmp = realloc(*(void **)ptr, sz)))
-		ERR("%s", msg ? msg : "(nil)");
-	*(void **)ptr = tmp;
+	/* signals to trap */
+	struct { int sig; char const *sig_name; } sigs[] = {
+		{SIGHUP, "SIGHUP"}, {SIGINT, "SIGINT"},
+		{SIGQUIT, "SIGQUIT"}, {SIGILL, "SIGILL"},
+		{SIGABRT, "SIGABRT"}, {SIGFPE, "SIGFPE"},
+		{SIGSEGV, "SIGSEGV"}, {SIGPIPE, "SIGPIPE"},
+		{SIGALRM, "SIGALRM"}, {SIGTERM, "SIGTERM"},
+		{SIGBUS, "SIGBUS"}, {SIGSYS, "SIGSYS"},
+		{SIGVTALRM, "SIGVTALRM"}, {SIGXCPU, "SIGXCPU"},
+		{SIGXFSZ, "SIGXFSZ"},
+	};
+	struct sigaction sa[ARR_LEN(sigs)];
+	for (size_t i = 0; i < ARR_LEN(sigs); i++) {
+		sa[i].sa_handler = SIG_DFL;
+		sigemptyset(&sa[i].sa_mask);
+		/* don't reset `SIGINT` handler */
+		sa[i].sa_flags = SA_RESETHAND;
+		if (sigaction(sigs[i].sig, &sa[i], NULL) == -1)
+			ERR("%s %s", sigs[i].sig_name, "sigaction()");
+	}
 }
 
 /* `fclose()` wrapper */
@@ -161,12 +204,10 @@ static inline void xfclose(FILE **restrict out_file)
 }
 
 /* `fopen()` wrapper */
-static inline FILE *xfopen(char const *restrict path, char const *restrict fmode)
+static inline void xfopen(FILE **restrict file, char const *restrict path, char const *restrict fmode)
 {
-	FILE *file;
-	if (!(file = fopen(path, fmode)))
+	if (!(*file = fopen(path, fmode)))
 		ERR("%s", "xfopen()");
-	return file;
 }
 
 /* `fread()` wrapper */
@@ -177,7 +218,6 @@ static inline size_t xfread(void *restrict ptr, size_t sz, size_t nmemb, FILE *r
 		return 0;
 	return cnt;
 }
-
 
 /* recursive free */
 static inline ptrdiff_t free_argv(char ***restrict argv)
@@ -198,19 +238,24 @@ static inline void strmv(ptrdiff_t off, char *restrict dest, char const *restric
 	if (!dest || !src)
 		ERRX("%s", "NULL pointer passed to strmv()");
 	ptrdiff_t src_sz;
-	char *dest_ptr = NULL, *src_ptr = memchr(src, '\0', EVAL_LIMIT);
-	if (off >= 0) {
+	char *dest_ptr = dest;
+	char const *src_end = src;
+	/* find the end of the source string */
+	for (size_t i = 0; i < EVAL_LIMIT && *src_end; i++, src_end++);
+	/* find the end of the desitnation string if offset is negative */
+	if (off < 0)
+		for (size_t i = 0; i < EVAL_LIMIT && *dest_ptr; i++, dest_ptr++);
+	else
 		dest_ptr = dest + off;
-	} else {
-		dest_ptr = memchr(dest, '\0', EVAL_LIMIT);
-	}
-	if (!src_ptr || !dest_ptr)
+	if (!src_end || !dest_ptr)
 		ERRX("%s", "strmv() string not null-terminated");
-	src_sz = src_ptr - src;
+	src_sz = src_end - src;
+	if (src_sz < 0)
+		ERRX("%s", "strmv() src_end - src < 0");
 	memcpy(dest_ptr, src, (size_t)src_sz + 1);
 }
 
-static inline ptrdiff_t free_str_list(STR_LIST *restrict plist)
+static inline ptrdiff_t free_str_list(struct str_list *restrict plist)
 {
 	size_t null_cnt = 0;
 	/* return -1 if passed NULL pointers */
@@ -232,19 +277,19 @@ static inline ptrdiff_t free_str_list(STR_LIST *restrict plist)
 	return null_cnt;
 }
 
-static inline void init_list(STR_LIST *restrict list_struct, char *restrict init_str)
+static inline void init_str_list(struct str_list *restrict list_struct, char *restrict init_str)
 {
 	list_struct->cnt = 0;
 	list_struct->max = 1;
-	xcalloc(&list_struct->list, 1, sizeof *list_struct->list, "list_ptr calloc()");
+	xcalloc(char, &list_struct->list, 1, sizeof *list_struct->list, "list_ptr calloc()");
 	if (!init_str)
 		return;
 	list_struct->cnt++;
-	xcalloc(&list_struct->list[list_struct->cnt - 1], 1, strlen(init_str) + 1, "init_list()");
+	xcalloc(char, &list_struct->list[list_struct->cnt - 1], 1, strlen(init_str) + 1, "init_str_list()");
 	strmv(0, list_struct->list[list_struct->cnt - 1], init_str);
 }
 
-static inline void append_str(STR_LIST *restrict list_struct, char const *restrict string, size_t pad)
+static inline void append_str(struct str_list *restrict list_struct, char const *restrict string, size_t pad)
 {
 	/* sanity checks */
 	if (!list_struct->list)
@@ -252,64 +297,64 @@ static inline void append_str(STR_LIST *restrict list_struct, char const *restri
 	/* realloc if cnt reaches current size */
 	if (++list_struct->cnt >= list_struct->max) {
 		list_struct->max *= 2;
-		xrealloc(&list_struct->list, sizeof *list_struct->list * list_struct->max, "append_str()");
+		xrealloc(char, &list_struct->list, sizeof *list_struct->list * list_struct->max, "append_str()");
 	}
 	if (!string) {
 		list_struct->list[list_struct->cnt - 1] = NULL;
 		return;
 	}
-	xcalloc(&list_struct->list[list_struct->cnt - 1], 1, strlen(string) + pad + 1, "append_str()");
+	xcalloc(char, &list_struct->list[list_struct->cnt - 1], 1, strlen(string) + pad + 1, "append_str()");
 	strmv(pad, list_struct->list[list_struct->cnt - 1], string);
 }
 
-static inline void init_tlist(TYPE_LIST *restrict list_struct)
+static inline void init_type_list(struct type_list *restrict list_struct)
 {
 	list_struct->cnt = 0;
 	list_struct->max = 1;
-	xcalloc(&list_struct->list, 1, sizeof *list_struct->list, "init_tlist()");
+	xcalloc(int, &list_struct->list, 1, sizeof *list_struct->list, "init_type_list()");
 }
 
-static inline void append_type(TYPE_LIST *restrict list_struct, enum var_type type_spec)
+static inline void append_type(struct type_list *restrict list_struct, enum var_type type_spec)
 {
 	/* realloc if cnt reaches current size */
 	if (++list_struct->cnt >= list_struct->max) {
 		list_struct->max *= 2;
-		xrealloc(&list_struct->list, sizeof *list_struct->list * list_struct->max, "append_type()");
+		xrealloc(int, &list_struct->list, sizeof *list_struct->list * list_struct->max, "append_type()");
 	}
 	list_struct->list[list_struct->cnt - 1] = type_spec;
 }
 
-static inline void init_flag_list(FLAG_LIST *restrict list_struct)
+static inline void init_flag_list(struct flag_list *restrict list_struct)
 {
 	list_struct->cnt = 0;
 	list_struct->max = 1;
-	xcalloc(&list_struct->list, 1, sizeof *list_struct->list, "init_flag_list()");
+	xcalloc(int, &list_struct->list, 1, sizeof *list_struct->list, "init_flag_list()");
 	list_struct->cnt++;
 	list_struct->list[list_struct->cnt - 1] = EMPTY;
 }
 
-static inline void append_flag(FLAG_LIST *restrict list_struct, enum src_flag flag)
+static inline void append_flag(struct flag_list *restrict list_struct, enum src_flag flag)
 {
 	/* realloc if cnt reaches current size */
 	if (++list_struct->cnt >= list_struct->max) {
 		list_struct->max *= 2;
-		xrealloc(&list_struct->list, sizeof *list_struct->list * list_struct->max, "append_flag()");
+		xrealloc(int, &list_struct->list, sizeof *list_struct->list * list_struct->max, "append_flag()");
 	}
 	list_struct->list[list_struct->cnt - 1] = flag;
 }
 
-static inline STR_LIST strsplit(char const *restrict str)
+static inline struct str_list strsplit(char const *restrict str)
 {
 	if (!str)
-		return (STR_LIST){0};
+		return (struct str_list){0};
 
-	STR_LIST list_struct;
+	struct str_list list_struct;
 	bool str_lit = false, chr_lit = false;
 	size_t memb_cnt = 0;
 	char arr[strlen(str) + 1], *ptr = arr;
 
 	strmv(0, ptr, str);
-	init_list(&list_struct, NULL);
+	init_str_list(&list_struct, NULL);
 
 	for (; *ptr; ptr++) {
 		switch (*ptr) {
@@ -339,6 +384,7 @@ static inline STR_LIST strsplit(char const *restrict str)
 			break;
 
 		case ';':
+		case '\n': /* fallthrough */
 			if (!str_lit && !chr_lit && !memb_cnt)
 				*ptr = '\x1c';
 			break;
@@ -352,12 +398,7 @@ static inline STR_LIST strsplit(char const *restrict str)
 		append_str(&list_struct, tmp, 0);
 	}
 
-#ifdef _DEBUG
-	for (size_t i = 0; i < list_struct.cnt; i++)
-		puts(list_struct.list[i]);
-#endif
-
 	return list_struct;
 }
 
-#endif
+#endif /* !defined(DEFS_H) */

@@ -1,21 +1,36 @@
 #!/bin/bash
 
-old_commit_msg="$(cat "${1}")"
-echo -n "" > "${1}"
+old_commit_msg="$(<"$1")"
+first_line=""
+
+# exit early if there is already a commit message
+if [ -n "$(sed -n -e '1 s/[[:space:]]*//p' "$1")" ]; then
+	exit
+fi
+
+: > "$1"
 
 # added
-for path in $(git diff --name-only --cached --diff-filter=A); do
-	echo "${path##*/}:" >> "${1}"
-done
+git diff --name-only --cached --diff-filter=A \
+	| while read -r path; do
+		# printf '%s\n' "${path##*/}:" >> "$1"
+		printf '%s\n' "${path%/*}:" >> "$1"
+	done
 
 # modified
-for path in $(git diff --name-only --cached --diff-filter=M); do
-	echo "${path##*/}:" >> "${1}"
-done
+git diff --name-only --cached --diff-filter=M \
+	| while read -r path; do
+		# printf '%s\n' "${path##*/}:" >> "$1"
+		printf '%s\n' "${path%/*}:" >> "$1"
+	done
 
 # deleted
-for path in $(git diff --name-only --cached --diff-filter=D); do
-	echo "${path##*/}:" >> "${1}"
-done
+git diff --name-only --cached --diff-filter=D \
+	| while read -r path; do
+		# printf '%s\n' "${path##*/}:" >> "$1"
+		printf '%s\n' "${path%/*}:" >> "$1"
+	done
 
-echo "${old_commit_msg}" >> "${1}"
+first_line="$(sed '1 !d' "$1")"
+printf '%s\n' "$first_line" > "$1"
+printf '%s\n' "$old_commit_msg" >> "$1"
