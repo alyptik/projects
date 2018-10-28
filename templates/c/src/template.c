@@ -42,7 +42,7 @@ extern char **environ;
 int main(int argc, char **argv)
 {
 	(void)argc, (void)argv;
-	printf("%s\n", "<template>");
+	printf("%s\n", "template");
 
 	return 0;
 }

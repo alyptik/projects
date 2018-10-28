@@ -5,7 +5,7 @@
  */
 
 #if !defined(TEMPLATE_H)
-#define TEMPLATE_H 1
+#define TEMPLATE_H
 
 #undef _GNU_SOURCE
 #define _GNU_SOURCE

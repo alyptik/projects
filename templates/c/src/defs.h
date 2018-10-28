@@ -5,7 +5,7 @@
  */
 
 #if !defined(DEFS_H)
-#define DEFS_H 1
+#define DEFS_H
 
 /* silence linter */
 #undef _GNU_SOURCE
@@ -21,49 +21,49 @@
 #include <unistd.h>
 
 /* macros */
-/* macros */
-#define DEFAULT(ARG, ALT)	((ARG) ? (ARG) : (ALT))
-#define MIN(A, B)		(((A) < (B)) ? (A) : (B))
-#define MAX(A, B)		(((A) > (B)) ? (A) : (B))
-#define ARR_LEN(ARR)		((sizeof (ARR)) / (sizeof *(ARR)))
-#define FOR_EACH_IN(LIST)	for (size_t i = 0; i < (LIST).cnt; i++)
-#define DPRINTF(FMT, ...)	fprintf(stderr, "\033[92m" FMT "\033[00m", __VA_ARGS__)
+#define min(a, b)		(((a) < (b)) ? (a) : (b))
+#define max(a, b)		(((a) > (b)) ? (a) : (b))
+#define arr_len(arr)		((sizeof (arr)) / (sizeof *(arr)))
+#define eprintf(fmt, args...)	fprintf(stderr, "\033[92m" fmt "\033[00m", ## args)
 /* `malloc()` wrapper */
-#define xmalloc(TYPE, PTR, SZ, MSG) \
+#define xmalloc(type, ptr, sz, msg) \
 	do { \
-		void *tmp = malloc(SZ); \
+		void *tmp = malloc(sz); \
 		if (!tmp) \
-			ERR("%s", (MSG)); \
-		*(TYPE **)PTR = tmp; \
+			err("malloc(): %s", (msg)); \
+		*(type **)ptr = tmp; \
 	} while (0)
 /* `calloc()` wrapper */
-#define xcalloc(TYPE, PTR, NMEMB, SZ, MSG) \
+#define xcalloc(type, ptr, nmemb, sz, msg) \
 	do { \
-		void *tmp = calloc((NMEMB), (SZ)); \
+		void *tmp = calloc((nmemb), (sz)); \
 		if (!tmp) \
-			ERR("%s", (MSG)); \
-		*(TYPE **)PTR = tmp; \
+			err("calloc(): %s", (msg)); \
+		*(type **)ptr = tmp; \
 	} while (0)
 /* `realloc()` wrapper */
-#define xrealloc(TYPE, PTR, SZ, MSG) \
+#define xrealloc(type, ptr, sz, msg) \
 	do { \
-		void *tmp[2] = {0, *(TYPE **)PTR}; \
-		if (!(tmp[0] = realloc(tmp[1], SZ))) \
-			ERR("%s", (MSG)); \
-		*(TYPE **)PTR = tmp[0]; \
+		void *tmp[2] = {0, *(type **)ptr}; \
+		if (!(tmp[0] = realloc(tmp[1], sz))) \
+			err("realloc(): %s", (msg)); \
+		*(type **)ptr = tmp[0]; \
 	} while (0)
 
+
 /* global version and usage strings */
-#define VERSION_STRING	"template v0.1.1"
-#define USAGE_STRING	"[-hptvw] " \
+#define VERSION_STRING	"template-0.1.1"
+#define USAGE_STRING	"[-hv] " \
 	"-h,--help:\t\tShow help/usage information\n\t" \
 	"-v,--version:\t\tShow version information"
 /* option default initializer */
 #define STATE_FLAG_DEF_INIT \
 	(struct state_flags){ \
-		.asm_flag = false, .eval_flag = false, .exec_flag = false, \
-		.in_flag = false, .out_flag = false, .parse_flag = true, \
-		.track_flag = true, .warn_flag = false, .hist_flag = false, \
+		.asm_flag = false, .eval_flag = false, \
+		.exec_flag = false, .in_flag = false, \
+		.out_flag = false, .parse_flag = true, \
+		.track_flag = true, .warn_flag = false, \
+		.hist_flag = false, \
 	}
 #define	RED		"\\033[31m"
 #define	GREEN		"\\033[32m"
@@ -183,14 +183,14 @@ static inline void reset_handlers(void)
 		{SIGVTALRM, "SIGVTALRM"}, {SIGXCPU, "SIGXCPU"},
 		{SIGXFSZ, "SIGXFSZ"},
 	};
-	struct sigaction sa[ARR_LEN(sigs)];
-	for (size_t i = 0; i < ARR_LEN(sigs); i++) {
+	struct sigaction sa[arr_len(sigs)];
+	for (size_t i = 0; i < arr_len(sigs); i++) {
 		sa[i].sa_handler = SIG_DFL;
 		sigemptyset(&sa[i].sa_mask);
 		/* don't reset `SIGINT` handler */
 		sa[i].sa_flags = SA_RESETHAND;
 		if (sigaction(sigs[i].sig, &sa[i], NULL) == -1)
-			ERR("%s %s", sigs[i].sig_name, "sigaction()");
+			err("%s %s", sigs[i].sig_name, "sigaction()");
 	}
 }
 
@@ -200,14 +200,14 @@ static inline void xfclose(FILE **restrict out_file)
 	if (!out_file || !*out_file)
 		return;
 	if (fclose(*out_file) == EOF)
-		WARN("%s", "xfclose()");
+		warn("%s", "xfclose()");
 }
 
 /* `fopen()` wrapper */
 static inline void xfopen(FILE **restrict file, char const *restrict path, char const *restrict fmode)
 {
 	if (!(*file = fopen(path, fmode)))
-		ERR("%s", "xfopen()");
+		err("%s", "xfopen()");
 }
 
 /* `fread()` wrapper */
@@ -236,7 +236,7 @@ static inline ptrdiff_t free_argv(char ***restrict argv)
 static inline void strmv(ptrdiff_t off, char *restrict dest, char const *restrict src) {
 	/* sanity checks */
 	if (!dest || !src)
-		ERRX("%s", "NULL pointer passed to strmv()");
+		errx("%s", "null pointer passed to strmv()");
 	ptrdiff_t src_sz;
 	char *dest_ptr = dest;
 	char const *src_end = src;
@@ -248,10 +248,10 @@ static inline void strmv(ptrdiff_t off, char *restrict dest, char const *restric
 	else
 		dest_ptr = dest + off;
 	if (!src_end || !dest_ptr)
-		ERRX("%s", "strmv() string not null-terminated");
+		errx("%s", "strmv() string not null-terminated");
 	src_sz = src_end - src;
 	if (src_sz < 0)
-		ERRX("%s", "strmv() src_end - src < 0");
+		errx("%s", "strmv() src_end - src < 0");
 	memcpy(dest_ptr, src, (size_t)src_sz + 1);
 }
 
@@ -293,7 +293,7 @@ static inline void append_str(struct str_list *restrict list_struct, char const 
 {
 	/* sanity checks */
 	if (!list_struct->list)
-		ERRX("%s", "NULL list_struct->list passed to append_str()");
+		errx("%s", "null list_struct->list passed to append_str()");
 	/* realloc if cnt reaches current size */
 	if (++list_struct->cnt >= list_struct->max) {
 		list_struct->max *= 2;
@@ -383,6 +383,7 @@ static inline struct str_list strsplit(char const *restrict str)
 				memb_cnt--;
 			break;
 
+		/* 0x1c is the ascii field separator character */
 		case ';':
 		case '\n': /* fallthrough */
 			if (!str_lit && !chr_lit && !memb_cnt)
@@ -391,6 +392,7 @@ static inline struct str_list strsplit(char const *restrict str)
 		}
 	}
 
+	/* 0x1c is the ascii field separator character */
 	ptr = arr;
 	for (char *tmp = strtok(ptr, "\x1c"); tmp; tmp = strtok(NULL, "\x1c")) {
 		while (isspace(*tmp))
