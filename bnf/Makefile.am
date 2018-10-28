@@ -1,0 +1,7 @@
+AUTOMAKE_OPTIONS = gnu
+SUBDIRS = doc src etc
+EXTRA_DIST = INSTALL NEWS README COPYING AUTHORS ChangeLog version.h
+
+
+
+
