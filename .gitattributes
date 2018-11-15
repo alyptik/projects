@@ -7,4 +7,4 @@
 # *.rb linguist-language=Ruby
 
 * linguist-vendored
-*.c linguist-vendored=false
+*.c linguist-vendored=false linguist-language=c
