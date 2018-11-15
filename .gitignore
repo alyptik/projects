@@ -32,3 +32,4 @@ vgcore*
 *.swn
 *.swo
 *.swp
+!gitattributes
