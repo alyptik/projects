@@ -33,3 +33,4 @@ vgcore*
 *.swo
 *.swp
 !gitattributes
+secure-systems-lab/
