@@ -1,46 +1,48 @@
 	.file	"generic.c"
+	.text
 	.section	.rodata
-.LC1:
-	.string	"\"intmax_t\" i"
 .LC2:
-	.string	"long int"
+	.string	"\"intmax_t\" i"
 .LC3:
-	.string	"\"ptrdiff_t\" p"
+	.string	"long int"
 .LC4:
-	.string	"unsigned long int"
+	.string	"\"ptrdiff_t\" p"
 .LC5:
+	.string	"unsigned long int"
+.LC6:
 	.string	"\"size_t\" s"
 	.align 8
-.LC6:
-	.string	"%30s is '%s'\n%30s is '%s'\n%30s is '%s'\n%30s is '%s'\n%30s is '%s'\n%30s is '%s'\n%30s is '%s'\n%30s is '%s'\n\n"
 .LC7:
-	.string	"pointer to int"
+	.string	"%30s is '%s'\n%30s is '%s'\n%30s is '%s'\n%30s is '%s'\n%30s is '%s'\n%30s is '%s'\n%30s is '%s'\n%30s is '%s'\n%30s is '%s'\n\n"
 .LC8:
-	.string	"\"array of int\" ai[3]"
+	.string	"complex long double"
 .LC9:
-	.string	"unsigned int"
+	.string	"\"complex long double\" z"
 .LC10:
-	.string	"\"0x7FFFFFFFU\""
+	.string	"pointer to int"
 .LC11:
-	.string	"\"0xFFFFFFFF\""
+	.string	"\"array of int\" ai[3]"
 .LC12:
-	.string	"int"
+	.string	"unsigned int"
 .LC13:
-	.string	"\"0x7FFFFFFF\""
+	.string	"\"0x7FFFFFFFU\""
 .LC14:
-	.string	"\"character\" constant '0'"
+	.string	"\"0xFFFFFFFF\""
 .LC15:
-	.string	"\"4.0 + 3.0i\""
+	.string	"int"
 .LC16:
-	.string	"%30s is "
+	.string	"\"0x7FFFFFFF\""
 .LC17:
-	.string	"'%Lf'"
+	.string	"\"character\" constant '0'"
+.LC18:
+	.string	"\"4.0 + 3.0i\""
 	.align 8
-.LC0:
-	.long	0
-	.long	1074790400
-	.long	0
-	.long	1074266112
+.LC19:
+	.string	"%20s has an imaginary part of "
+.LC20:
+	.string	"'%Lf'"
+.LC21:
+	.string	"%20s has a real part of "
 	.text
 	.globl	main
 	.type	main, @function
@@ -52,57 +54,114 @@ main:
 	.cfi_offset 6, -16
 	movq	%rsp, %rbp
 	.cfi_def_cfa_register 6
-	subq	$64, %rsp
-	movl	%edi, -36(%rbp)
-	movq	%rsi, -48(%rbp)
-	movq	$0, -28(%rbp)
-	movl	$0, -20(%rbp)
-	movsd	.LC0(%rip), %xmm0
-	movsd	%xmm0, -16(%rbp)
-	movsd	.LC0+8(%rip), %xmm0
-	movsd	%xmm0, -8(%rbp)
+	subq	$80, %rsp
+	movl	%edi, -68(%rbp)
+	movq	%rsi, -80(%rbp)
+	movq	%fs:40, %rax
+	movq	%rax, -8(%rbp)
+	xorl	%eax, %eax
+	movq	$0, -20(%rbp)
+	movl	$0, -12(%rbp)
+	fldt	.LC0(%rip)
+	fstpt	-64(%rbp)
+	fldt	.LC1(%rip)
+	fstpt	-48(%rbp)
 	subq	$8, %rsp
-	pushq	$.LC7
-	pushq	$.LC8
-	pushq	$.LC9
-	pushq	$.LC10
-	pushq	$.LC9
-	pushq	$.LC11
-	pushq	$.LC12
-	pushq	$.LC13
-	pushq	$.LC12
-	pushq	$.LC14
-	pushq	$.LC2
-	movl	$.LC1, %r9d
-	movl	$.LC2, %r8d
-	movl	$.LC3, %ecx
-	movl	$.LC4, %edx
-	movl	$.LC5, %esi
-	movl	$.LC6, %edi
+	leaq	.LC8(%rip), %rax
+	pushq	%rax
+	leaq	.LC9(%rip), %rax
+	pushq	%rax
+	leaq	.LC10(%rip), %rax
+	pushq	%rax
+	leaq	.LC11(%rip), %rax
+	pushq	%rax
+	leaq	.LC12(%rip), %rax
+	pushq	%rax
+	leaq	.LC13(%rip), %rax
+	pushq	%rax
+	leaq	.LC12(%rip), %rax
+	pushq	%rax
+	leaq	.LC14(%rip), %rax
+	pushq	%rax
+	leaq	.LC15(%rip), %rax
+	pushq	%rax
+	leaq	.LC16(%rip), %rax
+	pushq	%rax
+	leaq	.LC15(%rip), %rax
+	pushq	%rax
+	leaq	.LC17(%rip), %rax
+	pushq	%rax
+	leaq	.LC3(%rip), %rax
+	pushq	%rax
+	leaq	.LC2(%rip), %r9
+	leaq	.LC3(%rip), %r8
+	leaq	.LC4(%rip), %rax
+	movq	%rax, %rcx
+	leaq	.LC5(%rip), %rax
+	movq	%rax, %rdx
+	leaq	.LC6(%rip), %rax
+	movq	%rax, %rsi
+	leaq	.LC7(%rip), %rax
+	movq	%rax, %rdi
 	movl	$0, %eax
-	call	printf
-	addq	$96, %rsp
-	movl	$.LC15, %esi
-	movl	$.LC16, %edi
+	call	printf@PLT
+	addq	$112, %rsp
+	leaq	.LC18(%rip), %rax
+	movq	%rax, %rsi
+	leaq	.LC19(%rip), %rax
+	movq	%rax, %rdi
 	movl	$0, %eax
-	call	printf
-	movsd	-8(%rbp), %xmm0
-	movsd	%xmm0, -56(%rbp)
-	fldl	-56(%rbp)
+	call	printf@PLT
+	fldt	.LC1(%rip)
 	leaq	-16(%rsp), %rsp
 	fstpt	(%rsp)
-	movl	$.LC17, %edi
+	leaq	.LC20(%rip), %rax
+	movq	%rax, %rdi
 	movl	$0, %eax
-	call	printf
+	call	printf@PLT
 	addq	$16, %rsp
 	movl	$10, %edi
-	call	putchar
+	call	putchar@PLT
+	leaq	.LC18(%rip), %rax
+	movq	%rax, %rsi
+	leaq	.LC21(%rip), %rax
+	movq	%rax, %rdi
 	movl	$0, %eax
+	call	printf@PLT
+	fldt	.LC0(%rip)
+	leaq	-16(%rsp), %rsp
+	fstpt	(%rsp)
+	leaq	.LC20(%rip), %rax
+	movq	%rax, %rdi
+	movl	$0, %eax
+	call	printf@PLT
+	addq	$16, %rsp
+	movl	$10, %edi
+	call	putchar@PLT
+	movl	$0, %eax
+	movq	-8(%rbp), %rdx
+	subq	%fs:40, %rdx
+	je	.L3
+	call	__stack_chk_fail@PLT
+.L3:
 	leave
 	.cfi_def_cfa 7, 8
 	ret
 	.cfi_endproc
 .LFE0:
 	.size	main, .-main
-	.ident	"GCC: (GNU) 7.1.1 20170528"
+	.section	.rodata
+	.align 16
+.LC0:
+	.long	0
+	.long	-2147483648
+	.long	16385
+	.long	0
+	.align 16
+.LC1:
+	.long	0
+	.long	-1073741824
+	.long	16384
+	.long	0
+	.ident	"GCC: (Gentoo 13.2.1_p20240210 p13) 13.2.1 20240210"
 	.section	.note.GNU-stack,"",@progbits
