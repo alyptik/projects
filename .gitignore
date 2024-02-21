@@ -1,19 +1,5 @@
-*
 !*.*
-
 /*/
-!/bnf/
-!/net/
-!/bdwgc/
-!/tiger
-!/tiger/*
-!/school/
-!/arduino/
-!/zeromaps/
-!/templates/
-!/colorization/
-!/libatomic_ops/
-!/pimsimulator-code/
 
 *\~
 *.o

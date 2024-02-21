@@ -1,0 +1,17 @@
+#!/bin/python2
+
+import os,threading
+
+def f():
+    os.system('echo hi')
+
+class c(threading.Thread):
+    def __init__(self, target):
+        self.f = target
+        self.run()
+    def run(self):
+        self.f()
+
+t1 = c(target=f)
+t2 = c(target=f)
+t3 = c(target=f)
